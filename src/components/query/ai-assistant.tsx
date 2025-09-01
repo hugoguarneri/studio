@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState } from 'react';
@@ -33,8 +34,8 @@ export default function AIAssistant() {
       console.error(error);
       toast({
           variant: "destructive",
-          title: "AI Assistant Error",
-          description: "Could not generate query suggestions. Please try again.",
+          title: "Error del Asistente de IA",
+          description: "No se pudieron generar sugerencias de consultas. Por favor, inténtalo de nuevo.",
       });
     } finally {
       setLoading(false);
@@ -44,7 +45,7 @@ export default function AIAssistant() {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
-        title: "Copied to clipboard!",
+        title: "¡Copiado al portapapeles!",
     });
   }
 
@@ -53,31 +54,31 @@ export default function AIAssistant() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 font-headline">
           <Sparkles className="text-accent" />
-          AI Query Assistant
+          Asistente de Consultas con IA
         </CardTitle>
         <CardDescription>
-          Describe your schema and what you want to know. We'll suggest some queries.
+          Describe tu esquema y lo que quieres saber. Te sugeriremos algunas consultas.
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="schema">Database Schema</Label>
+            <Label htmlFor="schema">Esquema de la Base de Datos</Label>
             <Textarea
               id="schema"
               name="schema"
-              placeholder="e.g., users(id, name, email, signup_date)&#10;orders(id, user_id, amount, created_at)"
+              placeholder="p. ej., users(id, name, email, signup_date)&#10;orders(id, user_id, amount, created_at)"
               rows={4}
               required
               className="bg-card"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="preferences">Preferences</Label>
+            <Label htmlFor="preferences">Preferencias</Label>
             <Textarea
               id="preferences"
               name="preferences"
-              placeholder="e.g., I'm interested in user engagement metrics and sales trends."
+              placeholder="p. ej., Estoy interesado en métricas de participación de usuarios y tendencias de ventas."
               rows={2}
               required
               className="bg-card"
@@ -91,11 +92,11 @@ export default function AIAssistant() {
             ) : (
               <Sparkles className="mr-2 h-4 w-4" />
             )}
-            Generate Suggestions
+            Generar Sugerencias
           </Button>
           {suggestions.length > 0 && (
             <div className="mt-4 space-y-3">
-              <h4 className="font-semibold text-sm">Suggestions:</h4>
+              <h4 className="font-semibold text-sm">Sugerencias:</h4>
               <ScrollArea className="h-64">
                 <div className="space-y-2 pr-4">
                 {suggestions.map((query, index) => (

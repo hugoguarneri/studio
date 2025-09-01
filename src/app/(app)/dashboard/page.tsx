@@ -50,15 +50,15 @@ export default function DashboardListPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold font-headline tracking-tight">
-            Dashboards
+            Tableros
           </h1>
           <p className="text-muted-foreground">
-            Create, manage, and share your data dashboards.
+            Crea, administra y comparte tus tableros de datos.
           </p>
         </div>
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
-          New Dashboard
+          Nuevo Tablero
         </Button>
       </div>
 
@@ -85,10 +85,10 @@ export default function DashboardListPage() {
             </CardContent>
             <CardFooter className="gap-2">
               <Button asChild className="w-full">
-                <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
+                <Link href={`/dashboard/${dashboard.id}`}>Abrir</Link>
               </Button>
               <Button variant="outline">
-                <Users className="mr-2" /> Share
+                <Users className="mr-2" /> Compartir
               </Button>
             </CardFooter>
           </Card>

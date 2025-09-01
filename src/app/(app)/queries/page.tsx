@@ -1,3 +1,4 @@
+
 import QueryEditor from "@/components/query/query-editor";
 import AIAssistant from "@/components/query/ai-assistant";
 import { savedQueries } from "@/lib/mock-data";
@@ -19,9 +20,9 @@ export default function QueriesPage() {
         <QueryEditor />
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline">Saved Queries</CardTitle>
+            <CardTitle className="font-headline">Consultas Guardadas</CardTitle>
             <CardDescription>
-              Browse and manage your saved SQL queries.
+              Explora y gestiona tus consultas SQL guardadas.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -29,8 +30,8 @@ export default function QueriesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>Nombre</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -38,8 +39,8 @@ export default function QueriesPage() {
                     <TableRow key={query.id}>
                       <TableCell className="font-medium">{query.name}</TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">Edit</Button>
-                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">Delete</Button>
+                        <Button variant="ghost" size="sm">Editar</Button>
+                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">Borrar</Button>
                       </TableCell>
                     </TableRow>
                   ))}
