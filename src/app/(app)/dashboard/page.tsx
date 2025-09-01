@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -10,11 +11,19 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Users } from 'lucide-react';
+import { PlusCircle, Users, LayoutGrid, List } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { dashboards, dashboardGroups } from '@/lib/mock-data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const getRoleStyles = (role: string) => {
   switch (role) {
@@ -78,8 +87,83 @@ const DashboardGrid = ({ dashboards }: { dashboards: (typeof dashboards) }) => (
   </div>
 );
 
+const DashboardListItem = ({ dashboard }: { dashboard: (typeof dashboards)[0] }) => (
+  <TableRow>
+    <TableCell>
+      <div className="flex flex-col">
+        <Link href={`/dashboard/${dashboard.id}`} className="font-medium font-headline text-base hover:underline">
+          {dashboard.name}
+        </Link>
+        <span className="text-sm text-muted-foreground">{dashboard.description}</span>
+      </div>
+    </TableCell>
+    <TableCell>
+      <div className="flex items-center gap-2">
+        <Avatar className="h-6 w-6">
+          <AvatarImage src={dashboard.owner.avatarUrl} alt={dashboard.owner.name} />
+          <AvatarFallback>{dashboard.owner.name.charAt(0)}</AvatarFallback>
+        </Avatar>
+        <span className="text-sm text-muted-foreground">{dashboard.owner.name}</span>
+      </div>
+    </TableCell>
+    <TableCell>
+      <div
+        className={`text-xs font-medium py-1 px-2 rounded-md border text-center w-fit ${getRoleStyles(
+          dashboard.role
+        )}`}
+      >
+        {dashboard.role}
+      </div>
+    </TableCell>
+    <TableCell className="text-right">
+      <div className="flex justify-end gap-2">
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
+        </Button>
+        {dashboard.role === 'Owner' && (
+          <Button variant="ghost" size="sm">
+            <Users className="mr-2" /> Share
+          </Button>
+        )}
+      </div>
+    </TableCell>
+  </TableRow>
+);
+
+
+const DashboardList = ({ dashboards }: { dashboards: (typeof dashboards) }) => (
+  <Card>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Name</TableHead>
+          <TableHead>Owner</TableHead>
+          <TableHead>Role</TableHead>
+          <TableHead className="text-right">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {dashboards.map(dashboard => (
+          <DashboardListItem key={dashboard.id} dashboard={dashboard} />
+        ))}
+      </TableBody>
+    </Table>
+  </Card>
+);
+
+type ViewMode = 'grid' | 'list';
+
+const DashboardView = ({ dashboards, viewMode }: { dashboards: (typeof dashboards), viewMode: ViewMode }) => {
+  if (viewMode === 'list') {
+    return <DashboardList dashboards={dashboards} />;
+  }
+  return <DashboardGrid dashboards={dashboards} />;
+};
+
 
 export default function DashboardListPage() {
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+
   const favoriteDashboards = dashboards.filter(d => d.isFavorite);
   const myDashboards = dashboards.filter(d => d.role === 'Owner');
   const groupDashboards = dashboards.filter(d => d.groupId);
@@ -95,10 +179,28 @@ export default function DashboardListPage() {
             Create, manage, and share your data dashboards.
           </p>
         </div>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          New Dashboard
-        </Button>
+        <div className="flex items-center gap-2">
+            <Button
+                variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                size="icon"
+                onClick={() => setViewMode('grid')}
+            >
+                <LayoutGrid className="h-5 w-5" />
+                <span className="sr-only">Grid View</span>
+            </Button>
+            <Button
+                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                size="icon"
+                onClick={() => setViewMode('list')}
+            >
+                <List className="h-5 w-5" />
+                <span className="sr-only">List View</span>
+            </Button>
+            <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                New Dashboard
+            </Button>
+        </div>
       </div>
       
       <Tabs defaultValue="favorites" className="w-full">
@@ -108,10 +210,10 @@ export default function DashboardListPage() {
           <TabsTrigger value="groups">Groups</TabsTrigger>
         </TabsList>
         <TabsContent value="my-dashboards" className="mt-6">
-            <DashboardGrid dashboards={myDashboards} />
+            <DashboardView dashboards={myDashboards} viewMode={viewMode} />
         </TabsContent>
         <TabsContent value="favorites" className="mt-6">
-          <DashboardGrid dashboards={favoriteDashboards} />
+          <DashboardView dashboards={favoriteDashboards} viewMode={viewMode} />
         </TabsContent>
         <TabsContent value="groups" className="mt-6">
           <div className="flex flex-col gap-8">
@@ -121,7 +223,7 @@ export default function DashboardListPage() {
               return (
                 <div key={group.id}>
                   <h2 className="text-2xl font-bold font-headline mb-4">{group.name}</h2>
-                  <DashboardGrid dashboards={dashboardsInGroup} />
+                  <DashboardView dashboards={dashboardsInGroup} viewMode={viewMode} />
                 </div>
               )
             })}
