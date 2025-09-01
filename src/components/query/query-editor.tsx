@@ -11,13 +11,13 @@ export default function QueryEditor() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="font-headline">Editor de Consultas</CardTitle>
-                <CardDescription>Crea y ejecuta una nueva consulta SQL.</CardDescription>
+                <CardTitle className="font-headline">Query Editor</CardTitle>
+                <CardDescription>Craft and run a new SQL query.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div>
-                    <Label htmlFor="query-name">Nombre de la Consulta</Label>
-                    <Input id="query-name" placeholder="p. ej., Crecimiento Semanal de Usuarios" />
+                    <Label htmlFor="query-name">Query Name</Label>
+                    <Input id="query-name" placeholder="e.g., Weekly User Growth" />
                 </div>
                 <div>
                     <Label htmlFor="sql-query">SQL</Label>
@@ -32,11 +32,11 @@ export default function QueryEditor() {
             <CardFooter className="justify-end gap-2">
                 <Button variant="outline">
                     <PlayCircle className="mr-2 size-4" />
-                    Ejecutar
+                    Run
                 </Button>
                 <Button>
                     <Save className="mr-2 size-4" />
-                    Guardar
+                    Save
                 </Button>
             </CardFooter>
         </Card>

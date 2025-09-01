@@ -33,9 +33,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Tableros" },
-  { href: "/queries", icon: FileCode, label: "Editor de Consultas" },
-  { href: "/connections", icon: Database, label: "Conexiones" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboards" },
+  { href: "/queries", icon: FileCode, label: "Query Editor" },
+  { href: "/connections", icon: Database, label: "Connections" },
 ];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {

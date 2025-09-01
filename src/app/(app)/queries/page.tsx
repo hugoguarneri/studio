@@ -20,9 +20,9 @@ export default function QueriesPage() {
         <QueryEditor />
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline">Consultas Guardadas</CardTitle>
+            <CardTitle className="font-headline">Saved Queries</CardTitle>
             <CardDescription>
-              Explora y gestiona tus consultas SQL guardadas.
+              Browse and manage your saved SQL queries.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -30,8 +30,8 @@ export default function QueriesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nombre</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -39,8 +39,8 @@ export default function QueriesPage() {
                     <TableRow key={query.id}>
                       <TableCell className="font-medium">{query.name}</TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">Editar</Button>
-                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">Borrar</Button>
+                        <Button variant="ghost" size="sm">Edit</Button>
+                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">Delete</Button>
                       </TableCell>
                     </TableRow>
                   ))}
