@@ -195,6 +195,7 @@ export default function DashboardListPage() {
 
   const favoriteDashboards = dashboards.filter(d => d.isFavorite);
   const myDashboards = dashboards.filter(d => d.role === 'Owner');
+  const sharedWithMeDashboards = dashboards.filter(d => d.role !== 'Owner');
   const groupDashboards = dashboards.filter(d => d.groupId);
 
   return (
@@ -236,6 +237,7 @@ export default function DashboardListPage() {
         <TabsList className="flex flex-wrap h-auto justify-start">
           <TabsTrigger value="favorites">Favorites</TabsTrigger>
           <TabsTrigger value="my-dashboards">My Dashboards</TabsTrigger>
+          <TabsTrigger value="shared-with-me">Shared with me</TabsTrigger>
           <TabsTrigger value="groups">Groups</TabsTrigger>
         </TabsList>
         <TabsContent value="my-dashboards" className="mt-6">
@@ -243,6 +245,9 @@ export default function DashboardListPage() {
         </TabsContent>
         <TabsContent value="favorites" className="mt-6">
           <DashboardView dashboards={favoriteDashboards} viewMode={viewMode} />
+        </TabsContent>
+        <TabsContent value="shared-with-me" className="mt-6">
+          <DashboardView dashboards={sharedWithMeDashboards} viewMode={viewMode} />
         </TabsContent>
         <TabsContent value="groups" className="mt-6">
           <div className="flex flex-col gap-8">
