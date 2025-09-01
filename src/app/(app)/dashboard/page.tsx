@@ -52,7 +52,7 @@ const DashboardCard = ({ dashboard }: { dashboard: (typeof dashboards)[0] }) => 
             {dashboard.role}
           </div>
         </div>
-        <CardDescription>{dashboard.description}</CardDescription>
+        <CardDescription className="truncate">{dashboard.description}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex items-center gap-2">
@@ -92,7 +92,7 @@ const DashboardListItem = ({ dashboard }: { dashboard: (typeof dashboards)[0] })
         <Link href={`/dashboard/${dashboard.id}`} className="font-medium font-headline text-base hover:underline">
           {dashboard.name}
         </Link>
-        <span className="text-sm text-muted-foreground">{dashboard.description}</span>
+        <span className="text-sm text-muted-foreground truncate">{dashboard.description}</span>
       </div>
     </TableCell>
     <TableCell>
