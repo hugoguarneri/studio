@@ -81,9 +81,8 @@ const DashboardGrid = ({ dashboards }: { dashboards: (typeof dashboards) }) => (
 
 export default function DashboardListPage() {
   const favoriteDashboards = dashboards.filter(d => d.isFavorite);
-  const recentDashboards = [...dashboards].sort((a, b) => b.lastViewed.getTime() - a.lastViewed.getTime()).slice(0, 3);
   const myDashboards = dashboards.filter(d => d.role === 'Owner');
-  const sharedWithMe = dashboards.filter(d => d.role !== 'Owner');
+  const groupDashboards = dashboards.filter(d => d.groupId);
 
   return (
     <div className="flex flex-col gap-6">
@@ -105,34 +104,29 @@ export default function DashboardListPage() {
       <Tabs defaultValue="my-dashboards" className="w-full">
         <TabsList className="flex flex-wrap h-auto justify-start">
           <TabsTrigger value="my-dashboards">My Dashboards</TabsTrigger>
-          <TabsTrigger value="shared">Shared With Me</TabsTrigger>
           <TabsTrigger value="favorites">Favorites</TabsTrigger>
-          <TabsTrigger value="recent">Recently Viewed</TabsTrigger>
-          {dashboardGroups.map(group => (
-            <TabsTrigger key={group.id} value={`group-${group.id}`}>{group.name}</TabsTrigger>
-          ))}
+          <TabsTrigger value="groups">Groups</TabsTrigger>
         </TabsList>
         <TabsContent value="my-dashboards" className="mt-6">
             <DashboardGrid dashboards={myDashboards} />
         </TabsContent>
-        <TabsContent value="shared" className="mt-6">
-          <DashboardGrid dashboards={sharedWithMe} />
-        </TabsContent>
         <TabsContent value="favorites" className="mt-6">
           <DashboardGrid dashboards={favoriteDashboards} />
         </TabsContent>
-        <TabsContent value="recent" className="mt-6">
-          <DashboardGrid dashboards={recentDashboards} />
+        <TabsContent value="groups" className="mt-6">
+          <div className="flex flex-col gap-8">
+            {dashboardGroups.map(group => {
+              const dashboardsInGroup = dashboards.filter(d => d.groupId === group.id);
+              if (dashboardsInGroup.length === 0) return null;
+              return (
+                <div key={group.id}>
+                  <h2 className="text-2xl font-bold font-headline mb-4">{group.name}</h2>
+                  <DashboardGrid dashboards={dashboardsInGroup} />
+                </div>
+              )
+            })}
+          </div>
         </TabsContent>
-        {dashboardGroups.map(group => {
-            const groupDashboards = dashboards.filter(d => d.groupId === group.id);
-            if (groupDashboards.length === 0) return null;
-            return (
-              <TabsContent key={group.id} value={`group-${group.id}`} className="mt-6">
-                <DashboardGrid dashboards={groupDashboards} />
-              </TabsContent>
-            )
-        })}
       </Tabs>
     </div>
   );
