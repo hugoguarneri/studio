@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/table";
 import { PaginationControls } from '@/components/dashboard/pagination-controls';
 import { Input } from '@/components/ui/input';
+import DashboardGroupsView from '@/components/dashboard/dashboard-groups-view';
 
 const getRoleStyles = (role: string) => {
   switch (role) {
@@ -38,7 +39,7 @@ const getRoleStyles = (role: string) => {
   }
 };
 
-const DashboardCard = ({ dashboard }: { dashboard: (typeof dashboards)[0] }) => {
+export const DashboardCard = ({ dashboard }: { dashboard: (typeof dashboards)[0] }) => {
   return (
     <Card>
       <CardHeader>
@@ -149,7 +150,7 @@ const DashboardList = ({ dashboards }: { dashboards: (typeof dashboards) }) => (
   </Card>
 );
 
-type ViewMode = 'grid' | 'list';
+export type ViewMode = 'grid' | 'list';
 
 const DashboardView = ({ dashboards, viewMode }: { dashboards: (typeof dashboards), viewMode: ViewMode }) => {
   const ITEMS_PER_PAGE = viewMode === 'list' ? 5 : 6;
@@ -283,23 +284,11 @@ export default function DashboardListPage() {
           <DashboardView dashboards={sharedWithMeDashboards} viewMode={viewMode} />
         </TabsContent>
         <TabsContent value="groups" className="mt-6">
-          <div className="flex flex-col gap-8">
-            {dashboardGroups.map(group => {
-              const dashboardsInGroup = dashboards.filter(d => d.groupId === group.id);
-              if (dashboardsInGroup.length === 0) return null;
-              return (
-                <div key={group.id}>
-                  <h2 className="text-2xl font-bold font-headline mb-4">{group.name}</h2>
-                  <DashboardView dashboards={dashboardsInGroup} viewMode={viewMode} />
-                </div>
-              )
-            })}
-             {dashboardGroups.every(group => dashboards.filter(d => d.groupId === group.id).length === 0) && (
-                <div className="text-center text-muted-foreground py-12">
-                    No dashboards found in any group.
-                </div>
-             )}
-          </div>
+          <DashboardGroupsView
+            dashboards={dashboards}
+            groups={dashboardGroups}
+            viewMode={viewMode}
+          />
         </TabsContent>
       </Tabs>
     </div>
