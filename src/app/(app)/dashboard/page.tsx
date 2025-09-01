@@ -10,8 +10,9 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Users, Link as LinkIcon, Edit } from 'lucide-react';
+import { PlusCircle, Users } from 'lucide-react';
 import Link from 'next/link';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const dashboards = [
   {
@@ -19,18 +20,21 @@ const dashboards = [
     name: 'Q3 Sales Performance',
     description: 'Deep dive into sales metrics for the third quarter.',
     role: 'Owner',
+    owner: { name: 'You', avatarUrl: 'https://picsum.photos/id/237/32/32' },
   },
   {
     id: 'dash_2',
     name: 'Marketing Campaign Funnel',
     description: 'Shared by marketing@example.com',
     role: 'Editor',
+    owner: { name: 'Marketing Team', avatarUrl: 'https://picsum.photos/id/1/32/32' },
   },
   {
     id: 'dash_3',
     name: 'Website Analytics Overview',
     description: 'Public read-only dashboard for company-wide visibility.',
     role: 'Viewer',
+    owner: { name: 'Alex Doe', avatarUrl: 'https://picsum.photos/id/1005/32/32' },
   },
 ];
 
@@ -81,7 +85,15 @@ export default function DashboardListPage() {
               <CardDescription>{dashboard.description}</CardDescription>
             </CardHeader>
             <CardContent>
-              {/* Maybe show some avatars of members here */}
+              <div className="flex items-center gap-2">
+                  <Avatar className="h-6 w-6">
+                      <AvatarImage src={dashboard.owner.avatarUrl} alt={dashboard.owner.name} />
+                      <AvatarFallback>{dashboard.owner.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm text-muted-foreground">
+                    Owned by {dashboard.owner.name}
+                  </span>
+              </div>
             </CardContent>
             <CardFooter className="gap-2">
               <Button asChild className="w-full">
