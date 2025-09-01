@@ -72,16 +72,16 @@ const GroupCard = ({
   viewMode: ViewMode;
 }) => {
   return (
-    <Card>
-        <AccordionItem value={group.id} className="border-b-0">
-        <AccordionTrigger className="p-6 hover:no-underline data-[state=open]:border-b">
+    <AccordionItem value={group.id} className="border-b-0">
+      <Card className="overflow-hidden">
+        <AccordionTrigger className="p-6 hover:no-underline data-[state=closed]:border-b-0">
             <h2 className="text-2xl font-bold font-headline">{group.name}</h2>
-            </AccordionTrigger>
-        <AccordionContent className="p-6">
-            <GroupContent dashboards={dashboards} viewMode={viewMode} />
-        </AccordionContent>
-        </AccordionItem>
-    </Card>
+        </AccordionTrigger>
+      </Card>
+      <AccordionContent className="p-6">
+          <GroupContent dashboards={dashboards} viewMode={viewMode} />
+      </AccordionContent>
+    </AccordionItem>
   );
 };
 
