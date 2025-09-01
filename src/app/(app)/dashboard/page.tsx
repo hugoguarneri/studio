@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Users, LayoutGrid, List } from 'lucide-react';
+import { PlusCircle, Users, LayoutGrid, List, Search } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { dashboards, dashboardGroups } from '@/lib/mock-data';
@@ -25,6 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PaginationControls } from '@/components/dashboard/pagination-controls';
+import { Input } from '@/components/ui/input';
 
 const getRoleStyles = (role: string) => {
   switch (role) {
@@ -171,6 +172,14 @@ const DashboardView = ({ dashboards, viewMode }: { dashboards: (typeof dashboard
     setCurrentPage(1);
   });
 
+  if (dashboards.length === 0) {
+    return (
+      <div className="text-center text-muted-foreground py-12">
+        No dashboards found.
+      </div>
+    );
+  }
+
   return (
     <div>
       {viewMode === 'list' ? (
@@ -192,11 +201,15 @@ const DashboardView = ({ dashboards, viewMode }: { dashboards: (typeof dashboard
 
 export default function DashboardListPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const favoriteDashboards = dashboards.filter(d => d.isFavorite);
-  const myDashboards = dashboards.filter(d => d.role === 'Owner');
-  const sharedWithMeDashboards = dashboards.filter(d => d.role !== 'Owner');
-  const groupDashboards = dashboards.filter(d => d.groupId);
+  const filteredDashboards = dashboards.filter(d =>
+    d.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const favoriteDashboards = filteredDashboards.filter(d => d.isFavorite);
+  const myDashboards = filteredDashboards.filter(d => d.role === 'Owner');
+  const sharedWithMeDashboards = filteredDashboards.filter(d => d.role !== 'Owner');
 
   return (
     <div className="flex flex-col gap-6">
@@ -210,26 +223,41 @@ export default function DashboardListPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-            <Button
-                variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                size="icon"
-                onClick={() => setViewMode('grid')}
-            >
-                <LayoutGrid className="h-5 w-5" />
-                <span className="sr-only">Grid View</span>
-            </Button>
-            <Button
-                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                size="icon"
-                onClick={() => setViewMode('list')}
-            >
-                <List className="h-5 w-5" />
-                <span className="sr-only">List View</span>
-            </Button>
             <Button>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 New Dashboard
             </Button>
+        </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+        <div className="relative w-full md:w-64">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder="Search dashboards..." 
+            className="pl-10"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">View as:</span>
+          <Button
+              variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+              size="icon"
+              onClick={() => setViewMode('grid')}
+          >
+              <LayoutGrid className="h-5 w-5" />
+              <span className="sr-only">Grid View</span>
+          </Button>
+          <Button
+              variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+              size="icon"
+              onClick={() => setViewMode('list')}
+          >
+              <List className="h-5 w-5" />
+              <span className="sr-only">List View</span>
+          </Button>
         </div>
       </div>
       
@@ -252,7 +280,7 @@ export default function DashboardListPage() {
         <TabsContent value="groups" className="mt-6">
           <div className="flex flex-col gap-8">
             {dashboardGroups.map(group => {
-              const dashboardsInGroup = dashboards.filter(d => d.groupId === group.id);
+              const dashboardsInGroup = filteredDashboards.filter(d => d.groupId === group.id);
               if (dashboardsInGroup.length === 0) return null;
               return (
                 <div key={group.id}>
