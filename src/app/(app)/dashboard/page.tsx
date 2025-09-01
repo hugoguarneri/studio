@@ -24,6 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PaginationControls } from '@/components/dashboard/pagination-controls';
 
 const getRoleStyles = (role: string) => {
   switch (role) {
@@ -150,10 +151,42 @@ const DashboardList = ({ dashboards }: { dashboards: (typeof dashboards) }) => (
 type ViewMode = 'grid' | 'list';
 
 const DashboardView = ({ dashboards, viewMode }: { dashboards: (typeof dashboards), viewMode: ViewMode }) => {
-  if (viewMode === 'list') {
-    return <DashboardList dashboards={dashboards} />;
-  }
-  return <DashboardGrid dashboards={dashboards} />;
+  const ITEMS_PER_PAGE = viewMode === 'list' ? 5 : 6;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(dashboards.length / ITEMS_PER_PAGE);
+  const paginatedDashboards = dashboards.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+  
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  // Reset to page 1 when dashboards or viewMode change
+  useState(() => {
+    setCurrentPage(1);
+  });
+
+  return (
+    <div>
+      {viewMode === 'list' ? (
+        <DashboardList dashboards={paginatedDashboards} />
+      ) : (
+        <DashboardGrid dashboards={paginatedDashboards} />
+      )}
+      {totalPages > 1 && (
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      )}
+    </div>
+  );
 };
 
 
