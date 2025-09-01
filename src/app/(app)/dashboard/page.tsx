@@ -1,73 +1,98 @@
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, RefreshCw } from 'lucide-react';
-import SampleBarChart from '@/components/dashboard/sample-bar-chart';
-import SampleLineChart from '@/components/dashboard/sample-line-chart';
-import SampleDataTable from '@/components/dashboard/sample-data-table';
-import DashboardWidget from '@/components/dashboard/dashboard-widget';
-import SamplePieChart from '@/components/dashboard/sample-pie-chart';
+import { PlusCircle, Users, Link as LinkIcon, Edit } from 'lucide-react';
+import Link from 'next/link';
 
-export default function DashboardPage() {
-  const [refreshInterval] = useState(30); // in seconds
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+const dashboards = [
+  {
+    id: 'dash_1',
+    name: 'Q3 Sales Performance',
+    description: 'Deep dive into sales metrics for the third quarter.',
+    role: 'Owner',
+  },
+  {
+    id: 'dash_2',
+    name: 'Marketing Campaign Funnel',
+    description: 'Shared by marketing@example.com',
+    role: 'Editor',
+  },
+  {
+    id: 'dash_3',
+    name: 'Website Analytics Overview',
+    description: 'Public read-only dashboard for company-wide visibility.',
+    role: 'Viewer',
+  },
+];
 
-  useEffect(() => {
-    setLastUpdated(new Date());
-  }, []);
-
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    setTimeout(() => {
-      setLastUpdated(new Date());
-      setIsRefreshing(false);
-    }, 1000); // Simulate network delay
-  };
-
-  useEffect(() => {
-    if (refreshInterval > 0) {
-      const timer = setInterval(() => {
-        handleRefresh();
-      }, refreshInterval * 1000);
-      return () => clearInterval(timer);
+export default function DashboardListPage() {
+  const getRoleStyles = (role: string) => {
+    switch (role) {
+      case 'Owner':
+        return 'bg-primary/10 text-primary border-primary/20';
+      case 'Editor':
+        return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
+      default:
+        return 'bg-gray-500/10 text-gray-600 border-gray-500/20';
     }
-  }, [refreshInterval]);
-
+  };
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold font-headline tracking-tight">Dashboard</h1>
+          <h1 className="text-3xl font-bold font-headline tracking-tight">
+            Dashboards
+          </h1>
           <p className="text-muted-foreground">
-            {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : 'Loading...'}
+            Create, manage, and share your data dashboards.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Widget
-          </Button>
-        </div>
+        <Button>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          New Dashboard
+        </Button>
       </div>
-      <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-        <DashboardWidget title="Sales Over Time" className="lg:col-span-2">
-          <SampleLineChart />
-        </DashboardWidget>
-        <DashboardWidget title="Sales by Category">
-          <SampleBarChart />
-        </DashboardWidget>
-        <DashboardWidget title="User Demographics">
-          <SamplePieChart />
-        </DashboardWidget>
-        <DashboardWidget title="Recent Orders" className="lg:col-span-3">
-          <SampleDataTable />
-        </DashboardWidget>
+
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        {dashboards.map(dashboard => (
+          <Card key={dashboard.id}>
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <CardTitle className="font-headline text-xl">
+                  {dashboard.name}
+                </CardTitle>
+                <div
+                  className={`text-xs font-medium py-1 px-2 rounded-md border ${getRoleStyles(
+                    dashboard.role
+                  )}`}
+                >
+                  {dashboard.role}
+                </div>
+              </div>
+              <CardDescription>{dashboard.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* Maybe show some avatars of members here */}
+            </CardContent>
+            <CardFooter className="gap-2">
+              <Button asChild className="w-full">
+                <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
+              </Button>
+              <Button variant="outline">
+                <Users className="mr-2" /> Share
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
       </div>
     </div>
   );
