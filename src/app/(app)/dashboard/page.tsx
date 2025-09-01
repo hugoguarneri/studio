@@ -10,11 +10,11 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Users, Star, History, Folder } from 'lucide-react';
+import { PlusCircle, Users } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { dashboards, dashboardGroups } from '@/lib/mock-data';
-import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const getRoleStyles = (role: string) => {
   switch (role) {
@@ -70,15 +70,11 @@ const DashboardCard = ({ dashboard }: { dashboard: (typeof dashboards)[0] }) => 
   );
 };
 
-const DashboardSection = ({ title, icon: Icon, children }: { title: string, icon: React.ElementType, children: React.ReactNode }) => (
-  <div className="space-y-4">
-    <div className="flex items-center gap-3">
-      <Icon className="size-6 text-muted-foreground" />
-      <h2 className="text-2xl font-headline font-semibold">{title}</h2>
-    </div>
-    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-      {children}
-    </div>
+const DashboardGrid = ({ dashboards }: { dashboards: (typeof dashboards) }) => (
+  <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+    {dashboards.map(dashboard => (
+      <DashboardCard key={dashboard.id} dashboard={dashboard} />
+    ))}
   </div>
 );
 
@@ -86,10 +82,11 @@ const DashboardSection = ({ title, icon: Icon, children }: { title: string, icon
 export default function DashboardListPage() {
   const favoriteDashboards = dashboards.filter(d => d.isFavorite);
   const recentDashboards = [...dashboards].sort((a, b) => b.lastViewed.getTime() - a.lastViewed.getTime()).slice(0, 3);
-  const myDashboards = dashboards.filter(d => d.role === 'Owner' && !d.groupId);
+  const myDashboards = dashboards.filter(d => d.role === 'Owner');
+  const sharedWithMe = dashboards.filter(d => d.role !== 'Owner');
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold font-headline tracking-tight">
@@ -105,46 +102,38 @@ export default function DashboardListPage() {
         </Button>
       </div>
       
-      {favoriteDashboards.length > 0 && (
-        <DashboardSection title="Favorites" icon={Star}>
-          {favoriteDashboards.map(dashboard => (
-            <DashboardCard key={dashboard.id} dashboard={dashboard} />
+      <Tabs defaultValue="my-dashboards" className="w-full">
+        <TabsList className="flex flex-wrap h-auto justify-start">
+          <TabsTrigger value="my-dashboards">My Dashboards</TabsTrigger>
+          <TabsTrigger value="shared">Shared With Me</TabsTrigger>
+          <TabsTrigger value="favorites">Favorites</TabsTrigger>
+          <TabsTrigger value="recent">Recently Viewed</TabsTrigger>
+          {dashboardGroups.map(group => (
+            <TabsTrigger key={group.id} value={`group-${group.id}`}>{group.name}</TabsTrigger>
           ))}
-        </DashboardSection>
-      )}
-
-      {recentDashboards.length > 0 && (
-        <DashboardSection title="Recently Viewed" icon={History}>
-          {recentDashboards.map(dashboard => (
-            <DashboardCard key={dashboard.id} dashboard={dashboard} />
-          ))}
-        </DashboardSection>
-      )}
-
-      <Separator />
-
-      <div className="space-y-8">
+        </TabsList>
+        <TabsContent value="my-dashboards" className="mt-6">
+            <DashboardGrid dashboards={myDashboards} />
+        </TabsContent>
+        <TabsContent value="shared" className="mt-6">
+          <DashboardGrid dashboards={sharedWithMe} />
+        </TabsContent>
+        <TabsContent value="favorites" className="mt-6">
+          <DashboardGrid dashboards={favoriteDashboards} />
+        </TabsContent>
+        <TabsContent value="recent" className="mt-6">
+          <DashboardGrid dashboards={recentDashboards} />
+        </TabsContent>
         {dashboardGroups.map(group => {
-          const groupDashboards = dashboards.filter(d => d.groupId === group.id);
-          if (groupDashboards.length === 0) return null;
-          return (
-            <DashboardSection key={group.id} title={group.name} icon={Folder}>
-              {groupDashboards.map(dashboard => (
-                <DashboardCard key={dashboard.id} dashboard={dashboard} />
-              ))}
-            </DashboardSection>
-          )
+            const groupDashboards = dashboards.filter(d => d.groupId === group.id);
+            if (groupDashboards.length === 0) return null;
+            return (
+              <TabsContent key={group.id} value={`group-${group.id}`} className="mt-6">
+                <DashboardGrid dashboards={groupDashboards} />
+              </TabsContent>
+            )
         })}
-
-        {myDashboards.length > 0 && (
-          <DashboardSection title="My Dashboards" icon={Folder}>
-            {myDashboards.map(dashboard => (
-              <DashboardCard key={dashboard.id} dashboard={dashboard} />
-            ))}
-          </DashboardSection>
-        )}
-      </div>
-
+      </Tabs>
     </div>
   );
 }
