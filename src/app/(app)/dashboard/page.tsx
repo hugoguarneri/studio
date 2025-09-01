@@ -69,11 +69,9 @@ const DashboardCard = ({ dashboard }: { dashboard: (typeof dashboards)[0] }) => 
         <Button asChild className="w-full">
           <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
         </Button>
-        {dashboard.role === 'Owner' && (
-          <Button variant="outline">
-            <Users className="mr-2" /> Share
-          </Button>
-        )}
+        <Button variant="outline" disabled={dashboard.role !== 'Owner'}>
+          <Users className="mr-2" /> Share
+        </Button>
       </CardFooter>
     </Card>
   );
@@ -120,11 +118,9 @@ const DashboardListItem = ({ dashboard }: { dashboard: (typeof dashboards)[0] })
         <Button asChild variant="outline" size="sm">
           <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
         </Button>
-        {dashboard.role === 'Owner' && (
-          <Button variant="ghost" size="sm">
-            <Users className="mr-2" /> Share
-          </Button>
-        )}
+        <Button variant="ghost" size="sm" disabled={dashboard.role !== 'Owner'}>
+          <Users className="mr-2" /> Share
+        </Button>
       </div>
     </TableCell>
   </TableRow>
