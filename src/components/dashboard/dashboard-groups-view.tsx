@@ -10,11 +10,56 @@ import {
 } from '@/components/ui/accordion';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
-import { DashboardCard, type ViewMode } from '@/app/(app)/dashboard/page';
+import { DashboardCard, DashboardList, type ViewMode } from '@/app/(app)/dashboard/page';
 import { dashboards as allDashboards, dashboardGroups as allGroups } from '@/lib/mock-data';
 import { Button } from '../ui/button';
 
-const DASHBOARDS_PREVIEW_LIMIT = 3;
+const DASHBOARDS_PREVIEW_LIMIT_GRID = 3;
+const DASHBOARDS_PREVIEW_LIMIT_LIST = 2;
+
+
+const GroupContent = ({
+  dashboards,
+  viewMode,
+}: {
+  dashboards: (typeof allDashboards);
+  viewMode: ViewMode;
+}) => {
+  const [showAll, setShowAll] = useState(false);
+  const limit = viewMode === 'list' ? DASHBOARDS_PREVIEW_LIMIT_LIST : DASHBOARDS_PREVIEW_LIMIT_GRID;
+  const dashboardsToShow = showAll ? dashboards : dashboards.slice(0, limit);
+
+  if (dashboards.length === 0) {
+    return (
+      <div className="text-center text-muted-foreground py-8">
+        No dashboards in this group.
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {viewMode === 'list' ? (
+        <DashboardList dashboards={dashboardsToShow} />
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {dashboardsToShow.map(dashboard => (
+            <DashboardCard key={dashboard.id} dashboard={dashboard} />
+          ))}
+        </div>
+      )}
+
+      {dashboards.length > limit && (
+        <div className="mt-6 text-center">
+          <Button variant="secondary" onClick={() => setShowAll(!showAll)}>
+            {showAll ? 'Show Less' : `Show All (${dashboards.length})`}
+          </Button>
+        </div>
+      )}
+    </>
+  );
+};
+
 
 const GroupCard = ({
   group,
@@ -25,28 +70,14 @@ const GroupCard = ({
   dashboards: (typeof allDashboards);
   viewMode: ViewMode;
 }) => {
-  const [showAll, setShowAll] = useState(false);
-  const dashboardsToShow = showAll ? dashboards : dashboards.slice(0, DASHBOARDS_PREVIEW_LIMIT);
-
   return (
     <AccordionItem value={group.id} className="border-b-0">
-      <AccordionTrigger className="hover:no-underline -mb-4">
-        <h2 className="text-2xl font-bold font-headline">{group.name}</h2>
-      </AccordionTrigger>
+       <AccordionTrigger className="py-4 hover:no-underline">
+          <h2 className="text-2xl font-bold font-headline">{group.name}</h2>
+        </AccordionTrigger>
       <AccordionContent>
-        <div className="pt-8">
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {dashboardsToShow.map(dashboard => (
-                <DashboardCard key={dashboard.id} dashboard={dashboard} />
-            ))}
-            </div>
-            {dashboards.length > DASHBOARDS_PREVIEW_LIMIT && (
-            <div className="mt-6 text-center">
-                <Button variant="secondary" onClick={() => setShowAll(!showAll)}>
-                {showAll ? 'Show Less' : `Show All (${dashboards.length})`}
-                </Button>
-            </div>
-            )}
+        <div className="pt-4">
+          <GroupContent dashboards={dashboards} viewMode={viewMode} />
         </div>
       </AccordionContent>
     </AccordionItem>

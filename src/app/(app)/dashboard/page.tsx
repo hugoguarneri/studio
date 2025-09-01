@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -130,7 +130,7 @@ const DashboardListItem = ({ dashboard }: { dashboard: (typeof dashboards)[0] })
 );
 
 
-const DashboardList = ({ dashboards }: { dashboards: (typeof dashboards) }) => (
+export const DashboardList = ({ dashboards }: { dashboards: (typeof dashboards) }) => (
   <Card>
     <Table>
       <TableHeader>
@@ -173,10 +173,9 @@ const DashboardView = ({ dashboards, viewMode }: { dashboards: (typeof dashboard
     }
   };
 
-  // Reset to page 1 when dashboards, viewMode or searchTerm change
-  useState(() => {
+  useEffect(() => {
     setCurrentPage(1);
-  });
+  }, [dashboards, viewMode, searchTerm]);
 
   if (dashboards.length === 0) {
     return (
