@@ -72,13 +72,11 @@ const GroupCard = ({
   viewMode: ViewMode;
 }) => {
   return (
-    <AccordionItem value={group.id} className="border-b-0">
-      <Card className="overflow-hidden">
-        <AccordionTrigger className="p-6 hover:no-underline data-[state=closed]:border-b-0">
-            <h2 className="text-2xl font-bold font-headline">{group.name}</h2>
-        </AccordionTrigger>
-      </Card>
-      <AccordionContent className="p-6">
+    <AccordionItem value={group.id} className="border-0">
+      <AccordionTrigger className="p-4 hover:no-underline rounded-md bg-card shadow-sm data-[state=closed]:border-b-0 flex items-center">
+          <h2 className="text-xl font-bold font-headline">{group.name}</h2>
+      </AccordionTrigger>
+      <AccordionContent className="pt-6">
           <GroupContent dashboards={dashboards} viewMode={viewMode} />
       </AccordionContent>
     </AccordionItem>
@@ -138,7 +136,7 @@ export default function DashboardGroupsView({
           No groups or dashboards found matching your search.
         </div>
       ) : (
-        <Accordion type="multiple" defaultValue={defaultOpenItems} className="space-y-8">
+        <Accordion type="multiple" defaultValue={defaultOpenItems} className="space-y-4">
           {filteredGroups.map(group => (
             <GroupCard
               key={group.id}
