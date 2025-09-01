@@ -240,33 +240,30 @@ export default function DashboardListPage() {
             Create, manage, and share your data dashboards.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">View as:</span>
+                <Button
+                    variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                    size="icon"
+                    onClick={() => setViewMode('grid')}
+                >
+                    <LayoutGrid className="h-5 w-5" />
+                    <span className="sr-only">Grid View</span>
+                </Button>
+                <Button
+                    variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                    size="icon"
+                    onClick={() => setViewMode('list')}
+                >
+                    <List className="h-5 w-5" />
+                    <span className="sr-only">List View</span>
+                </Button>
+            </div>
             <Button>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 New Dashboard
             </Button>
-        </div>
-      </div>
-
-      <div className="flex justify-end items-center">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">View as:</span>
-          <Button
-              variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-              size="icon"
-              onClick={() => setViewMode('grid')}
-          >
-              <LayoutGrid className="h-5 w-5" />
-              <span className="sr-only">Grid View</span>
-          </Button>
-          <Button
-              variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-              size="icon"
-              onClick={() => setViewMode('list')}
-          >
-              <List className="h-5 w-5" />
-              <span className="sr-only">List View</span>
-          </Button>
         </div>
       </div>
       
