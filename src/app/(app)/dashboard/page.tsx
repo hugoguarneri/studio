@@ -101,10 +101,10 @@ export default function DashboardListPage() {
         </Button>
       </div>
       
-      <Tabs defaultValue="my-dashboards" className="w-full">
+      <Tabs defaultValue="favorites" className="w-full">
         <TabsList className="flex flex-wrap h-auto justify-start">
-          <TabsTrigger value="my-dashboards">My Dashboards</TabsTrigger>
           <TabsTrigger value="favorites">Favorites</TabsTrigger>
+          <TabsTrigger value="my-dashboards">My Dashboards</TabsTrigger>
           <TabsTrigger value="groups">Groups</TabsTrigger>
         </TabsList>
         <TabsContent value="my-dashboards" className="mt-6">
