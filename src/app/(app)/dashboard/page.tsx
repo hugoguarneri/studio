@@ -154,9 +154,14 @@ type ViewMode = 'grid' | 'list';
 const DashboardView = ({ dashboards, viewMode }: { dashboards: (typeof dashboards), viewMode: ViewMode }) => {
   const ITEMS_PER_PAGE = viewMode === 'list' ? 5 : 6;
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const totalPages = Math.ceil(dashboards.length / ITEMS_PER_PAGE);
-  const paginatedDashboards = dashboards.slice(
+  const filteredDashboards = dashboards.filter(d =>
+    d.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredDashboards.length / ITEMS_PER_PAGE);
+  const paginatedDashboards = filteredDashboards.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
@@ -167,7 +172,7 @@ const DashboardView = ({ dashboards, viewMode }: { dashboards: (typeof dashboard
     }
   };
 
-  // Reset to page 1 when dashboards or viewMode change
+  // Reset to page 1 when dashboards, viewMode or searchTerm change
   useState(() => {
     setCurrentPage(1);
   });
@@ -175,24 +180,42 @@ const DashboardView = ({ dashboards, viewMode }: { dashboards: (typeof dashboard
   if (dashboards.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-12">
-        No dashboards found.
+        No dashboards found for this category.
       </div>
     );
   }
 
   return (
-    <div>
-      {viewMode === 'list' ? (
-        <DashboardList dashboards={paginatedDashboards} />
-      ) : (
-        <DashboardGrid dashboards={paginatedDashboards} />
-      )}
-      {totalPages > 1 && (
-        <PaginationControls
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
+    <div className="space-y-4">
+      <div className="relative w-full md:w-64">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input 
+          placeholder="Search in this section..." 
+          className="pl-10"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
+      </div>
+
+      {filteredDashboards.length === 0 ? (
+         <div className="text-center text-muted-foreground py-12">
+          No dashboards found matching your search.
+        </div>
+      ) : (
+        <>
+          {viewMode === 'list' ? (
+            <DashboardList dashboards={paginatedDashboards} />
+          ) : (
+            <DashboardGrid dashboards={paginatedDashboards} />
+          )}
+          {totalPages > 1 && (
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          )}
+        </>
       )}
     </div>
   );
@@ -201,15 +224,10 @@ const DashboardView = ({ dashboards, viewMode }: { dashboards: (typeof dashboard
 
 export default function DashboardListPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredDashboards = dashboards.filter(d =>
-    d.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const favoriteDashboards = filteredDashboards.filter(d => d.isFavorite);
-  const myDashboards = filteredDashboards.filter(d => d.role === 'Owner');
-  const sharedWithMeDashboards = filteredDashboards.filter(d => d.role !== 'Owner');
+  const favoriteDashboards = dashboards.filter(d => d.isFavorite);
+  const myDashboards = dashboards.filter(d => d.role === 'Owner');
+  const sharedWithMeDashboards = dashboards.filter(d => d.role !== 'Owner');
 
   return (
     <div className="flex flex-col gap-6">
@@ -230,16 +248,7 @@ export default function DashboardListPage() {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
-        <div className="relative w-full md:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search dashboards..." 
-            className="pl-10"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+      <div className="flex justify-end items-center">
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">View as:</span>
           <Button
@@ -280,7 +289,7 @@ export default function DashboardListPage() {
         <TabsContent value="groups" className="mt-6">
           <div className="flex flex-col gap-8">
             {dashboardGroups.map(group => {
-              const dashboardsInGroup = filteredDashboards.filter(d => d.groupId === group.id);
+              const dashboardsInGroup = dashboards.filter(d => d.groupId === group.id);
               if (dashboardsInGroup.length === 0) return null;
               return (
                 <div key={group.id}>
@@ -289,6 +298,11 @@ export default function DashboardListPage() {
                 </div>
               )
             })}
+             {dashboardGroups.every(group => dashboards.filter(d => d.groupId === group.id).length === 0) && (
+                <div className="text-center text-muted-foreground py-12">
+                    No dashboards found in any group.
+                </div>
+             )}
           </div>
         </TabsContent>
       </Tabs>
