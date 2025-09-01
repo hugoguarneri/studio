@@ -13,6 +13,7 @@ import { Search } from 'lucide-react';
 import { DashboardCard, DashboardList, type ViewMode } from '@/app/(app)/dashboard/page';
 import { dashboards as allDashboards, dashboardGroups as allGroups } from '@/lib/mock-data';
 import { Button } from '../ui/button';
+import { Card } from '../ui/card';
 
 const DASHBOARDS_PREVIEW_LIMIT_GRID = 3;
 const DASHBOARDS_PREVIEW_LIMIT_LIST = 2;
@@ -71,16 +72,16 @@ const GroupCard = ({
   viewMode: ViewMode;
 }) => {
   return (
-    <AccordionItem value={group.id} className="border-b-0">
-       <AccordionTrigger className="py-4 hover:no-underline">
-          <h2 className="text-2xl font-bold font-headline">{group.name}</h2>
-        </AccordionTrigger>
-      <AccordionContent>
-        <div className="pt-4">
-          <GroupContent dashboards={dashboards} viewMode={viewMode} />
-        </div>
-      </AccordionContent>
-    </AccordionItem>
+    <Card>
+        <AccordionItem value={group.id} className="border-b-0">
+        <AccordionTrigger className="p-6 hover:no-underline data-[state=open]:border-b">
+            <h2 className="text-2xl font-bold font-headline">{group.name}</h2>
+            </AccordionTrigger>
+        <AccordionContent className="p-6">
+            <GroupContent dashboards={dashboards} viewMode={viewMode} />
+        </AccordionContent>
+        </AccordionItem>
+    </Card>
   );
 };
 
