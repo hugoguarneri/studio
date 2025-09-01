@@ -242,7 +242,6 @@ export default function DashboardListPage() {
         </div>
         <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">View as:</span>
                 <Button
                     variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
                     size="icon"
