@@ -42,3 +42,61 @@ export const savedQueries = [
     { id: 'q2', name: 'Daily Sales', content: 'SELECT date(created_at), sum(amount) FROM sales GROUP BY 1 ORDER BY 1 DESC;' },
     { id: 'q3', name: 'New Signups by Source', content: 'SELECT signup_source, count(*) FROM users GROUP BY 1;' },
 ];
+
+export const dashboards = [
+  {
+    id: 'dash_1',
+    name: 'Q3 Sales Performance',
+    description: 'Deep dive into sales metrics for the third quarter.',
+    role: 'Owner',
+    owner: { name: 'You', avatarUrl: 'https://picsum.photos/id/237/32/32' },
+    isFavorite: true,
+    lastViewed: new Date('2024-07-30T10:00:00Z'),
+    groupId: 'group_sales',
+  },
+  {
+    id: 'dash_2',
+    name: 'Marketing Campaign Funnel',
+    description: 'Shared by marketing@example.com',
+    role: 'Editor',
+    owner: { name: 'Marketing Team', avatarUrl: 'https://picsum.photos/id/1/32/32' },
+    isFavorite: false,
+    lastViewed: new Date('2024-07-29T14:30:00Z'),
+    groupId: 'group_marketing',
+  },
+  {
+    id: 'dash_3',
+    name: 'Website Analytics Overview',
+    description: 'Public read-only dashboard for company-wide visibility.',
+    role: 'Viewer',
+    owner: { name: 'Alex Doe', avatarUrl: 'https://picsum.photos/id/1005/32/32' },
+    isFavorite: true,
+    lastViewed: new Date('2024-07-30T11:00:00Z'),
+    groupId: 'group_general',
+  },
+  {
+    id: 'dash_4',
+    name: 'My Private Dashboard',
+    description: 'Only for my eyes.',
+    role: 'Owner',
+    owner: { name: 'You', avatarUrl: 'https://picsum.photos/id/237/32/32' },
+    isFavorite: false,
+    lastViewed: new Date('2024-07-28T09:00:00Z'),
+    groupId: null,
+  },
+];
+
+export const dashboardGroups = [
+  {
+    id: 'group_sales',
+    name: 'Sales Team',
+  },
+  {
+    id: 'group_marketing',
+    name: 'Marketing',
+  },
+  {
+    id: 'group_general',
+    name: 'General Company',
+  },
+];
