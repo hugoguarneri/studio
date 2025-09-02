@@ -120,13 +120,9 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
 
   return (
     <Card className="flex flex-col relative">
-       <Button variant="ghost" size="icon" className="absolute top-2 left-2 h-8 w-8" onClick={handleFavorite}>
-          <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
-          <span className="sr-only">Favorite</span>
-      </Button>
       <CardHeader>
         <div className="flex items-start justify-between">
-          <CardTitle className="font-headline text-xl truncate pr-2 pt-8">
+          <CardTitle className="font-headline text-xl truncate pr-2">
             <Link href={`/dashboard/${dashboard.id}`} className="hover:underline">
               {dashboard.name}
             </Link>
