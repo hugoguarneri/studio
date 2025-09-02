@@ -26,7 +26,7 @@ export default function NumberedTextarea() {
   }
 
   return (
-    <div className="flex-1 flex border-t bg-background overflow-hidden relative">
+    <div className="flex-1 flex border bg-background overflow-hidden relative rounded-md m-4 min-h-[120px]">
       <div 
         ref={lineNumbersRef} 
         className="w-10 text-right p-2 text-muted-foreground select-none overflow-y-hidden bg-muted/30"
