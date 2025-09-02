@@ -1,3 +1,4 @@
+
 export type Dashboard = {
   id: string;
   name: string;
@@ -38,21 +39,21 @@ export const userDemographics = [
 ];
 
 export const recentOrders = [
-  { id: 'ORD001', customer: 'John Doe', amount: 250.0, status: 'Fulfilled' },
-  { id: 'ORD002', customer: 'Jane Smith', amount: 150.75, status: 'Processing' },
-  { id: 'ORD003', customer: 'Sam Wilson', amount: 75.2, status: 'Fulfilled' },
-  { id: 'ORD004', customer: 'Alice Brown', amount: 300.0, status: 'Cancelled' },
-  { id: 'ORD005', customer: 'Bob Johnson', amount: 450.5, status: 'Fulfilled' },
-  { id: 'ORD006', customer: 'Charlie Davis', amount: 120.0, status: 'Fulfilled' },
-  { id: 'ORD007', customer: 'Diana Miller', amount: 85.50, status: 'Processing' },
-  { id: 'ORD008', customer: 'Ethan Garcia', amount: 500.0, status: 'Fulfilled' },
-  { id: 'ORD009', customer: 'Fiona Clark', amount: 210.25, status: 'Cancelled' },
-  { id: 'ORD010', customer: 'George Hall', amount: 99.99, status: 'Fulfilled' },
-  { id: 'ORD011', customer: 'Hannah Wright', amount: 180.0, status: 'Fulfilled' },
-  { id: 'ORD012', customer: 'Ian Taylor', amount: 42.0, status: 'Processing' },
-  { id: 'ORD013', customer: 'Jessica White', amount: 600.0, status: 'Fulfilled' },
-  { id: 'ORD014', customer: 'Kevin Adams', amount: 320.5, status: 'Fulfilled' },
-  { id: 'ORD015', customer: 'Laura Martin', amount: 190.75, status: 'Cancelled' },
+  { id: 'ORD001', customer: 'John Doe', product: 'Laptop', quantity: 1, amount: 250.0, status: 'Fulfilled', country: 'USA' },
+  { id: 'ORD002', customer: 'Jane Smith', product: 'Mouse', quantity: 2, amount: 150.75, status: 'Processing', country: 'Canada' },
+  { id: 'ORD003', customer: 'Sam Wilson', product: 'Keyboard', quantity: 1, amount: 75.2, status: 'Fulfilled', country: 'USA' },
+  { id: 'ORD004', customer: 'Alice Brown', product: 'Monitor', quantity: 1, amount: 300.0, status: 'Cancelled', country: 'UK' },
+  { id: 'ORD005', customer: 'Bob Johnson', product: 'Webcam', quantity: 1, amount: 450.5, status: 'Fulfilled', country: 'USA' },
+  { id: 'ORD006', customer: 'Charlie Davis', product: 'Headphones', quantity: 3, amount: 120.0, status: 'Fulfilled', country: 'Australia' },
+  { id: 'ORD007', customer: 'Diana Miller', product: 'Docking Station', quantity: 1, amount: 85.50, status: 'Processing', country: 'Germany' },
+  { id: 'ORD008', customer: 'Ethan Garcia', product: 'Laptop Stand', quantity: 1, amount: 500.0, status: 'Fulfilled', country: 'USA' },
+  { id: 'ORD009', customer: 'Fiona Clark', product: 'USB Hub', quantity: 2, amount: 210.25, status: 'Cancelled', country: 'France' },
+  { id: 'ORD010', customer: 'George Hall', product: 'External HDD', quantity: 1, amount: 99.99, status: 'Fulfilled', country: 'USA' },
+  { id: 'ORD011', customer: 'Hannah Wright', product: 'Laptop Sleeve', quantity: 1, amount: 180.0, status: 'Fulfilled', country: 'Canada' },
+  { id: 'ORD012', customer: 'Ian Taylor', product: 'Power Bank', quantity: 4, amount: 42.0, status: 'Processing', country: 'UK' },
+  { id: 'ORD013', customer: 'Jessica White', product: 'Gaming Mouse', quantity: 1, amount: 600.0, status: 'Fulfilled', country: 'USA' },
+  { id: 'ORD014', customer: 'Kevin Adams', product: 'Mechanical Keyboard', quantity: 1, amount: 320.5, status: 'Fulfilled', country: 'Germany' },
+  { id: 'ORD015', customer: 'Laura Martin', product: '4K Monitor', quantity: 1, amount: 190.75, status: 'Cancelled', country: 'USA' },
 ];
 
 export const connections = [

@@ -55,8 +55,11 @@ export default function QueryResults() {
     const initialWidths = {
         id: 150,
         customer: 200,
+        product: 200,
+        quantity: 100,
         status: 120,
         amount: 150,
+        country: 150,
     };
     const [widths, setWidths] = useState(initialWidths);
 
@@ -95,11 +98,18 @@ export default function QueryResults() {
                 <Table>
                     <TableHeader>
                     <TableRow>
+                        <TableHead className="sticky top-0 z-10 bg-card w-[50px]">Row</TableHead>
                         <ResizableHeader onResize={handleResize('id')} width={widths.id}>
                             Order ID
                         </ResizableHeader>
                         <ResizableHeader onResize={handleResize('customer')} width={widths.customer}>
                             Customer
+                        </ResizableHeader>
+                        <ResizableHeader onResize={handleResize('product')} width={widths.product}>
+                            Product
+                        </ResizableHeader>
+                        <ResizableHeader onResize={handleResize('quantity')} width={widths.quantity} className="text-right">
+                            Quantity
                         </ResizableHeader>
                         <ResizableHeader onResize={handleResize('status')} width={widths.status}>
                             Status
@@ -107,21 +117,28 @@ export default function QueryResults() {
                         <ResizableHeader onResize={handleResize('amount')} width={widths.amount} className="text-right">
                            Amount
                         </ResizableHeader>
+                         <ResizableHeader onResize={handleResize('country')} width={widths.country}>
+                            Country
+                        </ResizableHeader>
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {recentOrders.map((order) => (
+                    {recentOrders.map((order, index) => (
                         <TableRow key={order.id}>
+                        <TableCell className="text-muted-foreground">{index + 1}</TableCell>
                         <TableCell className="font-medium font-code">
                             {order.id}
                         </TableCell>
                         <TableCell>{order.customer}</TableCell>
+                        <TableCell>{order.product}</TableCell>
+                        <TableCell className="text-right font-code">{order.quantity}</TableCell>
                         <TableCell>
                            {order.status}
                         </TableCell>
                         <TableCell className="text-right font-code">
                             ${order.amount.toFixed(2)}
                         </TableCell>
+                        <TableCell>{order.country}</TableCell>
                         </TableRow>
                     ))}
                     </TableBody>
