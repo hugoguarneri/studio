@@ -78,7 +78,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </SidebarHeader>
         <SidebarContent>
-          <div className="flex flex-col gap-4 mt-8">
+          <div className="flex flex-col gap-4 mt-16">
             <div className="mt-4">
               <h2 className="px-2 mb-2 text-xs font-semibold text-sidebar-foreground/50 tracking-wider">Dashboards</h2>
               <SidebarMenu>
