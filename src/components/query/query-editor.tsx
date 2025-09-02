@@ -6,8 +6,6 @@ import { PlayCircle, Save, Sparkles } from "lucide-react"
 import NumberedTextarea from "./numbered-textarea"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet"
 import AIAssistant from "./ai-assistant"
-import { Input } from "../ui/input"
-import { Label } from "../ui/label"
 
 export default function QueryEditor() {
     return (
@@ -17,10 +15,6 @@ export default function QueryEditor() {
                 <CardDescription>
                     Enter your SQL query below. You can also use the AI assistant to generate one.
                 </CardDescription>
-                <div className="space-y-2 pt-2">
-                    <Label htmlFor="query-name">Query Name</Label>
-                    <Input id="query-name" placeholder="e.g. Monthly Active Users" />
-                </div>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col p-0">
                 <NumberedTextarea />
