@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { PlayCircle, Save } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { connections } from "@/lib/mock-data"
 
 export default function QueryEditor() {
     return (
@@ -15,9 +17,24 @@ export default function QueryEditor() {
                 <CardDescription>Craft and run a new SQL query.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div>
-                    <Label htmlFor="query-name">Query Name</Label>
-                    <Input id="query-name" placeholder="e.g., Weekly User Growth" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <Label htmlFor="query-name">Query Name</Label>
+                        <Input id="query-name" placeholder="e.g., Weekly User Growth" />
+                    </div>
+                    <div>
+                        <Label htmlFor="connection">Connection</Label>
+                        <Select>
+                            <SelectTrigger id="connection">
+                                <SelectValue placeholder="Select a database" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {connections.map(conn => (
+                                    <SelectItem key={conn.id} value={conn.id}>{conn.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
                 <div>
                     <Label htmlFor="sql-query">SQL</Label>
