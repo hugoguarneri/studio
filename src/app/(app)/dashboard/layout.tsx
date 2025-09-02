@@ -6,22 +6,12 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, LayoutGrid, List } from 'lucide-react';
 import type { ViewMode } from './page';
 import { usePathname } from 'next/navigation';
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
 import Link from 'next/link';
-
-const dashboardTabs = [
-    { href: "/dashboard/my-dashboards", label: "My Dashboards" },
-    { href: "/dashboard/favorites", label: "Favorites" },
-    { href: "/dashboard/shared-with-me", label: "Shared with me" },
-    { href: "/dashboard/groups", label: "Groups" },
-];
 
 const getPageTitle = (pathname: string) => {
     switch (pathname) {
+        case '/dashboard':
+            return 'Dashboards';
         case '/dashboard/my-dashboards':
             return 'My Dashboards';
         case '/dashboard/favorites':
@@ -31,7 +21,7 @@ const getPageTitle = (pathname: string) => {
         case '/dashboard/groups':
             return 'Dashboard Groups';
         default:
-            return 'Dashboards'
+            return 'Dashboard'
     }
 }
 
@@ -40,6 +30,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
 
   const isGroupsPage = pathname === '/dashboard/groups';
+  const isDashboardHomePage = pathname === '/dashboard';
 
   return (
     <div className="flex flex-col gap-6">
@@ -53,7 +44,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </p>
         </div>
         <div className="flex items-center gap-4">
-            {!isGroupsPage && (
+            {!isGroupsPage && !isDashboardHomePage && (
                 <div className="flex items-center gap-2">
                     <Button
                         variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
@@ -73,15 +64,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </Button>
                 </div>
             )}
-            <Button>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                New Dashboard
-            </Button>
+            {!isDashboardHomePage && (
+              <Button>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  New Dashboard
+              </Button>
+            )}
         </div>
       </div>
       
-      {/* Pass viewMode to children */}
-      {React.cloneElement(children as React.ReactElement, { viewMode })}
+      {/* Pass viewMode to children if it's not the main dashboard page */}
+      { isDashboardHomePage 
+        ? children
+        : React.cloneElement(children as React.ReactElement, { viewMode })
+      }
     </div>
   );
 }
