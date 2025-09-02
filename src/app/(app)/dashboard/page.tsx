@@ -54,9 +54,10 @@ type DashboardActionsProps = {
   onDelete: (id: string) => void;
   onLeave: (id: string) => void;
   onShare: (id: string) => void;
+  onCopyLink: (id: string) => void;
 };
 
-const DashboardActions = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onShare }: DashboardActionsProps) => {
+const DashboardActions = ({ dashboard, onDelete, onLeave, onCopyLink }: DashboardActionsProps) => {
   const { toast } = useToast();
 
   const handleDelete = () => {
@@ -77,18 +78,13 @@ const DashboardActions = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onSh
   }
   
   const handleCopyLink = () => {
-    const url = `${window.location.origin}/dashboard/${dashboard.id}`;
-    navigator.clipboard.writeText(url);
-    toast({
-      title: "Link Copied",
-      description: "Dashboard link copied to clipboard.",
-    });
+    onCopyLink(dashboard.id);
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="w-9 h-9">
+        <Button variant="ghost" size="icon" className="w-8 h-8">
           <MoreVertical className="h-4 w-4" />
           <span className="sr-only">More actions</span>
         </Button>
@@ -116,7 +112,7 @@ const DashboardActions = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onSh
 };
 
 
-export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onShare }: DashboardActionsProps) => {
+export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onShare, onCopyLink }: DashboardActionsProps) => {
   const { toast } = useToast();
   
   const handleFavorite = (e: React.MouseEvent) => {
@@ -169,15 +165,15 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
         <Button asChild className="flex-1" size="sm">
           <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
         </Button>
-        <Button variant="outline" size="sm" onClick={handleFavorite}>
+        <Button variant="outline" size="icon" className="w-9 h-9" onClick={handleFavorite}>
           <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
           <span className="sr-only">Favorite</span>
         </Button>
-        <Button variant="outline" size="sm" onClick={handleShare}>
+        <Button variant="outline" size="icon" className="w-9 h-9" onClick={handleShare}>
           <Share2 className="h-4 w-4" />
           <span className="sr-only">Share</span>
         </Button>
-        <DashboardActions dashboard={dashboard} onFavoriteToggle={onFavoriteToggle} onDelete={onDelete} onLeave={onLeave} onShare={onShare}/>
+        <DashboardActions dashboard={dashboard} onFavoriteToggle={onFavoriteToggle} onDelete={onDelete} onLeave={onLeave} onShare={onShare} onCopyLink={() => onCopyLink(dashboard.id)} />
       </CardFooter>
     </Card>
   );
@@ -191,7 +187,7 @@ const DashboardGrid = ({ dashboards, ...actionProps }: { dashboards: Dashboard[]
   </div>
 );
 
-const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onShare }: DashboardActionsProps) => {
+const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onShare, onCopyLink }: DashboardActionsProps) => {
     const { toast } = useToast();
     
     const handleFavorite = (e: React.MouseEvent) => {
@@ -243,15 +239,15 @@ const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onS
             <Button asChild variant="outline" size="sm">
               <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
             </Button>
-            <Button variant="outline" size="sm" onClick={handleFavorite}>
+            <Button variant="outline" size="icon" className="w-9 h-9" onClick={handleFavorite}>
                 <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
                 <span className="sr-only">Favorite</span>
             </Button>
-            <Button variant="outline" size="sm" onClick={handleShare}>
+            <Button variant="outline" size="icon" className="w-9 h-9" onClick={handleShare}>
               <Share2 className="h-4 w-4" />
               <span className="sr-only">Share</span>
             </Button>
-            <DashboardActions dashboard={dashboard} onFavoriteToggle={onFavoriteToggle} onDelete={onDelete} onLeave={onLeave} onShare={onShare} />
+            <DashboardActions dashboard={dashboard} onFavoriteToggle={onFavoriteToggle} onDelete={onDelete} onLeave={onLeave} onShare={onShare} onCopyLink={() => onCopyLink(dashboard.id)} />
         </div>
         </TableCell>
       </TableRow>
@@ -314,13 +310,23 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
       title: "Shared Dashboard",
       description: `"${dashboard?.name}" has been shared.`,
     });
-  }
+  };
+
+  const onCopyLink = (id: string) => {
+    const url = `${window.location.origin}/dashboard/${id}`;
+    navigator.clipboard.writeText(url);
+    toast({
+      title: "Link Copied",
+      description: "Dashboard link copied to clipboard.",
+    });
+  };
 
   const actionProps = {
     onFavoriteToggle,
     onDelete,
     onLeave,
     onShare,
+    onCopyLink,
   };
 
   const filteredDashboards = dashboards.filter(d =>

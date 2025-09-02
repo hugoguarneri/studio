@@ -8,6 +8,14 @@ import type { ViewMode } from './page';
 import { usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
+const pageTitles: { [key: string]: string } = {
+    '/dashboard': 'All Dashboards',
+    '/dashboard/my-dashboards': 'My Dashboards',
+    '/dashboard/favorites': 'Favorites',
+    '/dashboard/shared-with-me': 'Shared with me',
+    '/dashboard/groups': 'Groups',
+  };
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -21,11 +29,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const isDashboardSubPage = /^\/dashboard(\/(my-dashboards|favorites|shared-with-me|groups))?$/.test(pathname);
   const isDashboardIdPage = /^\/dashboard\/dash_/.test(pathname);
+  const title = pageTitles[pathname] || 'Dashboards';
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex-1">
+            {isDashboardSubPage && !isDashboardIdPage && (
+                <div>
+                    <h1 className="text-2xl font-bold font-headline">{title}</h1>
+                    <p className="text-muted-foreground">Create, manage, and share your data dashboards.</p>
+                </div>
+            )}
         </div>
         <div className="flex items-center gap-4">
             {(isDashboardSubPage && !isDashboardIdPage) && (

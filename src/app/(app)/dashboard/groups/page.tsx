@@ -32,11 +32,20 @@ export default function GroupsPage() {
     });
   }
 
+  const handleCopyLink = () => {
+    // This is a placeholder. In a real app, you would copy the group link.
+    toast({
+      title: "Link Copied",
+      description: "Group link copied to clipboard.",
+    });
+  };
+
   const actionProps = {
     onFavoriteToggle: handleFavoriteToggle,
     onDelete: handleDelete,
     onLeave: handleLeave,
     onShare: handleShare,
+    onCopyLink: handleCopyLink,
   };
 
   return (

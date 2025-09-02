@@ -1,5 +1,6 @@
 
 
+
 'use client';
 
 import { useState } from 'react';
@@ -20,17 +21,20 @@ const DASHBOARDS_PREVIEW_LIMIT_GRID = 3;
 const DASHBOARDS_PREVIEW_LIMIT_LIST = 2;
 
 type DashboardActionsProps = {
-  onFavoriteToggle: (id: string) => void;
-  onDelete: (id: string) => void;
-  onLeave: (id: string) => void;
+    onFavoriteToggle: (id: string) => void;
+    onDelete: (id: string) => void;
+    onLeave: (id: string) => void;
+    onShare: (id: string) => void;
+    onCopyLink: (id: string) => void;
 };
+
 
 const GroupContent = ({
   dashboards,
   actionProps,
 }: {
   dashboards: (typeof allDashboards);
-  actionProps: DashboardActionsProps;
+  actionProps: Omit<DashboardActionsProps, 'dashboard'>;
 }) => {
   const [showAll, setShowAll] = useState(false);
   const searchParams = useSearchParams();
@@ -77,7 +81,7 @@ const GroupCard = ({
 }: {
   group: (typeof allGroups)[0];
   dashboards: (typeof allDashboards);
-  actionProps: DashboardActionsProps;
+  actionProps: Omit<DashboardActionsProps, 'dashboard'>;
 }) => {
   return (
     <AccordionItem value={group.id} className="border-0">
@@ -98,7 +102,7 @@ export default function DashboardGroupsView({
 }: {
   dashboards: Dashboard[];
   groups: (typeof allGroups);
-  actionProps: DashboardActionsProps;
+  actionProps: Omit<DashboardActionsProps, 'dashboard'>;
 }) {
   const [searchTerm, setSearchTerm] = useState('');
 
