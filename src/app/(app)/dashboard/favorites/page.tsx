@@ -1,10 +1,10 @@
 
 'use client';
 
-import { DashboardView, ViewMode } from '../page';
+import { DashboardView } from '../page';
 import { dashboards } from '@/lib/mock-data';
 
-export default function FavoritesPage({ viewMode }: { viewMode: ViewMode }) {
+export default function FavoritesPage() {
   const favoriteDashboards = dashboards.filter(d => d.isFavorite);
-  return <DashboardView dashboards={favoriteDashboards} viewMode={viewMode} />;
+  return <DashboardView dashboards={favoriteDashboards} />;
 }

@@ -1,12 +1,12 @@
 
-
 'use client'
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, LayoutGrid, List } from 'lucide-react';
 import type { ViewMode } from './page';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
 const getPageTitle = (pathname: string) => {
     switch (pathname) {
@@ -29,8 +29,15 @@ const getPageTitle = (pathname: string) => {
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const viewMode = (searchParams.get('view') as ViewMode) || 'grid';
+  
+  const createQueryString = (name: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set(name, value)
+    return params.toString()
+  }
 
   const pageTitle = getPageTitle(pathname);
   const isIndividualDashboard = !!pathname.match(/^\/dashboard\/dash_[^/]+$/);
@@ -52,18 +59,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <Button
                         variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
                         size="icon"
-                        onClick={() => setViewMode('grid')}
+                        asChild
                     >
-                        <LayoutGrid className="h-5 w-5" />
-                        <span className="sr-only">Grid View</span>
+                        <Link href={`${pathname}?${createQueryString('view', 'grid')}`}>
+                          <LayoutGrid className="h-5 w-5" />
+                          <span className="sr-only">Grid View</span>
+                        </Link>
                     </Button>
                     <Button
                         variant={viewMode === 'list' ? 'secondary' : 'ghost'}
                         size="icon"
-                        onClick={() => setViewMode('list')}
+                        asChild
                     >
-                        <List className="h-5 w-5" />
-                        <span className="sr-only">List View</span>
+                        <Link href={`${pathname}?${createQueryString('view', 'list')}`}>
+                          <List className="h-5 w-5" />
+                          <span className="sr-only">List View</span>
+                        </Link>
                     </Button>
                 </div>
             )}
@@ -74,12 +85,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </div>
       
-      {React.Children.map(children, child => {
-        if (React.isValidElement(child)) {
-          return React.cloneElement(child, { viewMode } as { viewMode: ViewMode });
-        }
-        return child;
-      })}
+      {children}
     </div>
   );
 }

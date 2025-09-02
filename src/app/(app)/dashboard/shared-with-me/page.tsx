@@ -1,10 +1,10 @@
 
 'use client';
 
-import { DashboardView, ViewMode } from '../page';
+import { DashboardView } from '../page';
 import { dashboards } from '@/lib/mock-data';
 
-export default function SharedWithMePage({ viewMode }: { viewMode: ViewMode }) {
+export default function SharedWithMePage() {
   const sharedWithMeDashboards = dashboards.filter(d => d.role !== 'Owner');
-  return <DashboardView dashboards={sharedWithMeDashboards} viewMode={viewMode} />;
+  return <DashboardView dashboards={sharedWithMeDashboards} />;
 }

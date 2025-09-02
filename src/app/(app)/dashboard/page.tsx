@@ -27,6 +27,7 @@ import { PaginationControls } from '@/components/dashboard/pagination-controls';
 import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
 import DashboardSectionCard from '@/components/dashboard/dashboard-section-card';
+import { useSearchParams } from 'next/navigation';
 
 const getRoleStyles = (role: string) => {
   switch (role) {
@@ -152,7 +153,10 @@ export const DashboardList = ({ dashboards }: { dashboards: (typeof allDashboard
 
 export type ViewMode = 'grid' | 'list';
 
-export const DashboardView = ({ dashboards, viewMode }: { dashboards: (typeof allDashboards), viewMode: ViewMode }) => {
+export const DashboardView = ({ dashboards }: { dashboards: (typeof allDashboards) }) => {
+  const searchParams = useSearchParams();
+  const viewMode = (searchParams.get('view') as ViewMode) || 'grid';
+  
   const ITEMS_PER_PAGE = viewMode === 'list' ? 5 : 6;
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
@@ -229,7 +233,7 @@ const sections = [
   { icon: Box, title: "Groups", description: "Organize dashboards into groups.", href: "/dashboard/groups" },
 ];
 
-export default function DashboardPage({ viewMode }: { viewMode: ViewMode }) {
+export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <div className="grid gap-4 sm:grid-cols-2">
@@ -240,7 +244,7 @@ export default function DashboardPage({ viewMode }: { viewMode: ViewMode }) {
 
       <div>
         <h2 className="text-2xl font-bold font-headline mb-4">All Dashboards</h2>
-        <DashboardView dashboards={allDashboards} viewMode={viewMode} />
+        <DashboardView dashboards={allDashboards} />
       </div>
     </div>
   )

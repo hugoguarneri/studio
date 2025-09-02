@@ -1,10 +1,10 @@
 
 'use client';
 
-import { DashboardView, ViewMode } from '../page';
+import { DashboardView } from '../page';
 import { dashboards } from '@/lib/mock-data';
 
-export default function MyDashboardsPage({ viewMode }: { viewMode: ViewMode }) {
+export default function MyDashboardsPage() {
   const myDashboards = dashboards.filter(d => d.role === 'Owner');
-  return <DashboardView dashboards={myDashboards} viewMode={viewMode} />;
+  return <DashboardView dashboards={myDashboards} />;
 }

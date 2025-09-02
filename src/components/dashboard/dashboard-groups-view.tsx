@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -13,7 +14,7 @@ import { Search } from 'lucide-react';
 import { DashboardCard, DashboardList, type ViewMode } from '@/app/(app)/dashboard/page';
 import { dashboards as allDashboards, dashboardGroups as allGroups } from '@/lib/mock-data';
 import { Button } from '../ui/button';
-import { Card } from '../ui/card';
+import { useSearchParams } from 'next/navigation';
 
 const DASHBOARDS_PREVIEW_LIMIT_GRID = 3;
 const DASHBOARDS_PREVIEW_LIMIT_LIST = 2;
@@ -21,12 +22,12 @@ const DASHBOARDS_PREVIEW_LIMIT_LIST = 2;
 
 const GroupContent = ({
   dashboards,
-  viewMode,
 }: {
   dashboards: (typeof allDashboards);
-  viewMode: ViewMode;
 }) => {
   const [showAll, setShowAll] = useState(false);
+  const searchParams = useSearchParams();
+  const viewMode = (searchParams.get('view') as ViewMode) || 'grid';
   const limit = viewMode === 'list' ? DASHBOARDS_PREVIEW_LIMIT_LIST : DASHBOARDS_PREVIEW_LIMIT_GRID;
   const dashboardsToShow = showAll ? dashboards : dashboards.slice(0, limit);
 
@@ -65,11 +66,9 @@ const GroupContent = ({
 const GroupCard = ({
   group,
   dashboards,
-  viewMode,
 }: {
   group: (typeof allGroups)[0];
   dashboards: (typeof allDashboards);
-  viewMode: ViewMode;
 }) => {
   return (
     <AccordionItem value={group.id} className="border-0">
@@ -77,7 +76,7 @@ const GroupCard = ({
           <h2 className="text-xl font-bold font-headline">{group.name}</h2>
       </AccordionTrigger>
       <AccordionContent className="pt-6">
-          <GroupContent dashboards={dashboards} viewMode={viewMode} />
+          <GroupContent dashboards={dashboards} />
       </AccordionContent>
     </AccordionItem>
   );
@@ -86,11 +85,9 @@ const GroupCard = ({
 export default function DashboardGroupsView({
   dashboards,
   groups,
-  viewMode,
 }: {
   dashboards: (typeof allDashboards);
   groups: (typeof allGroups);
-  viewMode: ViewMode;
 }) {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -142,7 +139,6 @@ export default function DashboardGroupsView({
               key={group.id}
               group={group}
               dashboards={group.dashboards}
-              viewMode={viewMode}
             />
           ))}
         </Accordion>
