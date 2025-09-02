@@ -10,9 +10,9 @@ import SampleDataTable from '@/components/dashboard/sample-data-table';
 import DashboardWidget from '@/components/dashboard/dashboard-widget';
 import SamplePieChart from '@/components/dashboard/sample-pie-chart';
 
-export default function DashboardPage({ params, viewMode }: { params: { dashboardId: string }, viewMode: any }) {
+export default function DashboardPage({ params }: { params: { dashboardId: string }}) {
   const [refreshInterval] = useState(30); // in seconds
-  const [, setLastUpdated] = useState<Date | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
@@ -40,7 +40,10 @@ export default function DashboardPage({ params, viewMode }: { params: { dashboar
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-        {/* Breadcrumbs now handle the title */}
+          <h1 className="text-2xl font-bold font-headline">Dashboard {params.dashboardId}</h1>
+          <p className="text-muted-foreground">
+            {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : ''}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing}>

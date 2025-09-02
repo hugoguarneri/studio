@@ -17,6 +17,12 @@ export default function QueriesPage() {
   return (
     <div className="grid gap-8 lg:grid-cols-5">
       <div className="lg:col-span-3 flex flex-col gap-8">
+        <div>
+          <h1 className="text-2xl font-bold font-headline">Query Editor</h1>
+          <p className="text-muted-foreground">
+            Craft, save, and manage your SQL queries.
+          </p>
+        </div>
         <QueryEditor />
         <Card>
           <CardHeader>
