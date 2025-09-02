@@ -10,13 +10,13 @@ import { Input } from "../ui/input"
 
 export default function QueryEditor() {
     return (
-        <Card className="flex flex-col h-full">
-            <CardHeader className="p-4 pb-0">
+        <Card className="flex flex-col">
+            <CardHeader className="p-4">
                 <Input 
                     defaultValue="New Query"
                     className="border-none text-xl font-semibold h-auto p-2 focus-visible:ring-0 font-headline"
                 />
-                <CardDescription className="mt-2 mb-2">
+                <CardDescription className="px-2 mt-1">
                     Enter your SQL query below. You can also use the AI assistant to generate one.
                 </CardDescription>
             </CardHeader>

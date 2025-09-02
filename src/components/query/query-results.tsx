@@ -35,7 +35,7 @@ const ChartSettings = () => (
 
 export default function QueryResults() {
   return (
-    <Card className="flex flex-col h-full">
+    <Card className="flex flex-col h-full flex-1 min-h-0">
       <CardHeader>
         <CardTitle className="font-headline">Results</CardTitle>
         <CardDescription>
@@ -43,7 +43,7 @@ export default function QueryResults() {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col flex-1 min-h-0">
-        <Tabs defaultValue="data" className="flex flex-col flex-1">
+        <Tabs defaultValue="data" className="flex flex-col flex-1 min-h-0">
           <div className="flex justify-between items-start">
             <TabsList>
               <TabsTrigger value="data">
@@ -61,8 +61,8 @@ export default function QueryResults() {
           </div>
 
           <TabsContent value="data" className="flex-1 flex flex-col mt-4 min-h-0">
-            <ScrollArea className="flex-1 relative">
-                <Table className="h-full">
+            <ScrollArea className="flex-1 relative border rounded-md">
+                <Table>
                     <TableHeader className="sticky top-0 bg-card z-10">
                     <TableRow>
                         <TableHead className="sticky left-0 bg-card w-[60px]">Row</TableHead>

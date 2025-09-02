@@ -5,7 +5,7 @@ import DatabaseSchema from "@/components/query/database-schema";
 
 export default function QueriesPage() {
   return (
-    <div className="flex flex-col gap-6 h-full">
+    <div className="flex flex-col gap-6 h-full overflow-hidden">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold font-headline">Query Editor</h1>
@@ -14,12 +14,14 @@ export default function QueriesPage() {
           </p>
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6">
-        <DatabaseSchema />
-        <QueryEditor />
-      </div>
-      <div className="min-h-0">
-        <QueryResults />
+      <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6 min-h-0 flex-1">
+        <div className="flex flex-col gap-6">
+            <DatabaseSchema />
+        </div>
+        <div className="flex flex-col gap-6 min-h-0">
+            <QueryEditor />
+            <QueryResults />
+        </div>
       </div>
     </div>
   );
