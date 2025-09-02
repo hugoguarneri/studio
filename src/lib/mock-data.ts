@@ -43,6 +43,16 @@ export const recentOrders = [
   { id: 'ORD003', customer: 'Sam Wilson', amount: 75.2, status: 'Fulfilled' },
   { id: 'ORD004', customer: 'Alice Brown', amount: 300.0, status: 'Cancelled' },
   { id: 'ORD005', customer: 'Bob Johnson', amount: 450.5, status: 'Fulfilled' },
+  { id: 'ORD006', customer: 'Charlie Davis', amount: 120.0, status: 'Fulfilled' },
+  { id: 'ORD007', customer: 'Diana Miller', amount: 85.50, status: 'Processing' },
+  { id: 'ORD008', customer: 'Ethan Garcia', amount: 500.0, status: 'Fulfilled' },
+  { id: 'ORD009', customer: 'Fiona Clark', amount: 210.25, status: 'Cancelled' },
+  { id: 'ORD010', customer: 'George Hall', amount: 99.99, status: 'Fulfilled' },
+  { id: 'ORD011', customer: 'Hannah Wright', amount: 180.0, status: 'Fulfilled' },
+  { id: 'ORD012', customer: 'Ian Taylor', amount: 42.0, status: 'Processing' },
+  { id: 'ORD013', customer: 'Jessica White', amount: 600.0, status: 'Fulfilled' },
+  { id: 'ORD014', customer: 'Kevin Adams', amount: 320.5, status: 'Fulfilled' },
+  { id: 'ORD015', customer: 'Laura Martin', amount: 190.75, status: 'Cancelled' },
 ];
 
 export const connections = [

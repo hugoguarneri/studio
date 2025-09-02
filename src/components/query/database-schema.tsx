@@ -17,12 +17,18 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Button } from '../ui/button';
 
 const schemaContent = [
-    { name: 'users', columns: ['id', 'name', 'email', 'signup_date'] },
-    { name: 'orders', columns: ['id', 'user_id', 'amount', 'created_at'] },
-    { name: 'products', columns: ['id', 'name', 'price', 'category'] },
-    { name: 'sessions', columns: ['id', 'user_id', 'start_time', 'end_time'] },
+    { name: 'users', columns: ['id', 'name', 'email', 'signup_date', 'last_login'] },
+    { name: 'orders', columns: ['id', 'user_id', 'amount', 'created_at', 'status'] },
+    { name: 'products', columns: ['id', 'name', 'price', 'category', 'stock_quantity'] },
+    { name: 'sessions', columns: ['id', 'user_id', 'start_time', 'end_time', 'ip_address'] },
     { name: 'events', columns: ['id', 'name', 'properties', 'timestamp'] },
-    { name: 'pageviews', columns: ['id', 'path', 'user_id', 'timestamp'] },
+    { name: 'pageviews', columns: ['id', 'path', 'user_id', 'timestamp', 'referrer'] },
+    { name: 'employees', columns: ['employee_id', 'first_name', 'last_name', 'hire_date', 'department_id'] },
+    { name: 'departments', columns: ['department_id', 'department_name', 'manager_id'] },
+    { name: 'customers', columns: ['customer_id', 'company_name', 'contact_name', 'country'] },
+    { name: 'suppliers', columns: ['supplier_id', 'company_name', 'contact_name', 'city', 'country'] },
+    { name: 'invoices', columns: ['invoice_id', 'customer_id', 'invoice_date', 'total_amount'] },
+    { name: 'invoice_items', columns: ['item_id', 'invoice_id', 'product_id', 'quantity', 'unit_price'] },
 ];
 
 export default function DatabaseSchema() {
