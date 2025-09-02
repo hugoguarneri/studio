@@ -1,7 +1,6 @@
 
 'use client';
 
-import { redirect, usePathname } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -11,10 +10,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Users, LayoutGrid, List, Search, Star, User, Box, ArrowRight } from 'lucide-react';
+import { Users, Search } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { dashboards as allDashboards, dashboardGroups } from '@/lib/mock-data';
+import { dashboards as allDashboards } from '@/lib/mock-data';
 import {
   Table,
   TableBody,
@@ -26,8 +25,6 @@ import {
 import { PaginationControls } from '@/components/dashboard/pagination-controls';
 import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
-import DashboardGroupsView from "@/components/dashboard/dashboard-groups-view";
-import DashboardSectionCard from "@/components/dashboard/dashboard-section-card";
 
 const getRoleStyles = (role: string) => {
   switch (role) {
@@ -222,46 +219,6 @@ export const DashboardView = ({ dashboards, viewMode }: { dashboards: (typeof al
   );
 };
 
-const sections = [
-  { 
-    href: "/dashboard/my-dashboards", 
-    icon: User,
-    title: "My Dashboards", 
-    description: "Dashboards you have created and own." 
-  },
-  { 
-    href: "/dashboard/favorites", 
-    icon: Star,
-    title: "Favorites", 
-    description: "Your collection of most-used dashboards." 
-  },
-  { 
-    href: "/dashboard/shared-with-me", 
-    icon: Users,
-    title: "Shared with Me", 
-    description: "Dashboards that others have shared with you." 
-  },
-  { 
-    href: "/dashboard/groups", 
-    icon: Box,
-    title: "Groups", 
-    description: "Collaborate with your team in shared spaces." 
-  },
-];
-
-
-export default function DashboardListPage() {
-  const pathname = usePathname();
-  
-  if (pathname !== '/dashboard') {
-    return null;
-  }
-  
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {sections.map((section) => (
-        <DashboardSectionCard key={section.href} {...section} />
-      ))}
-    </div>
-  )
+export default function DashboardPage({ viewMode }: { viewMode: ViewMode }) {
+  return <DashboardView dashboards={allDashboards} viewMode={viewMode} />;
 }

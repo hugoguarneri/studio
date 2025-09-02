@@ -37,9 +37,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboards", exact: true },
-  { href: "/dashboard/favorites", icon: Star, label: "Favorites" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "All Dashboards", exact: true },
   { href: "/dashboard/my-dashboards", icon: User, label: "My Dashboards" },
+  { href: "/dashboard/favorites", icon: Star, label: "Favorites" },
   { href: "/dashboard/shared-with-me", icon: Users, label: "Shared with me" },
   { href: "/dashboard/groups", icon: Box, label: "Groups" },
   { href: "/queries", icon: FileCode, label: "Query Editor" },

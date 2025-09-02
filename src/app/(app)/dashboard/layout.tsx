@@ -11,7 +11,7 @@ import Link from 'next/link';
 const getPageTitle = (pathname: string) => {
     switch (pathname) {
         case '/dashboard':
-            return 'Dashboards';
+            return 'All Dashboards';
         case '/dashboard/my-dashboards':
             return 'My Dashboards';
         case '/dashboard/favorites':
@@ -21,7 +21,10 @@ const getPageTitle = (pathname: string) => {
         case '/dashboard/groups':
             return 'Dashboard Groups';
         default:
-            return 'Dashboard'
+            if (pathname.startsWith('/dashboard/')) {
+                return 'Dashboard';
+            }
+            return 'Dashboards';
     }
 }
 
@@ -29,22 +32,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const pathname = usePathname();
 
-  const isGroupsPage = pathname === '/dashboard/groups';
-  const isDashboardHomePage = pathname === '/dashboard';
+  const pageTitle = getPageTitle(pathname);
+  const isIndividualDashboard = pathname.match(/^\/dashboard\/\w+$/);
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold font-headline tracking-tight">
-            {getPageTitle(pathname)}
+            {pageTitle}
           </h1>
           <p className="text-muted-foreground">
             Create, manage, and share your data dashboards.
           </p>
         </div>
         <div className="flex items-center gap-4">
-            {!isGroupsPage && !isDashboardHomePage && (
+            {!isIndividualDashboard && (
                 <div className="flex items-center gap-2">
                     <Button
                         variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
@@ -64,7 +67,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </Button>
                 </div>
             )}
-            {!isDashboardHomePage && (
+            {!isIndividualDashboard && (
               <Button>
                   <PlusCircle className="mr-2 h-4 w-4" />
                   New Dashboard
@@ -73,11 +76,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </div>
       
-      {/* Pass viewMode to children if it's not the main dashboard page */}
-      { isDashboardHomePage 
-        ? children
-        : React.cloneElement(children as React.ReactElement, { viewMode })
-      }
+      {/* Pass viewMode to children */}
+      {React.cloneElement(children as React.ReactElement, { viewMode })}
     </div>
   );
 }

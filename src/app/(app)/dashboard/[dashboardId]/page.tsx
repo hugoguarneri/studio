@@ -10,7 +10,7 @@ import SampleDataTable from '@/components/dashboard/sample-data-table';
 import DashboardWidget from '@/components/dashboard/dashboard-widget';
 import SamplePieChart from '@/components/dashboard/sample-pie-chart';
 
-export default function DashboardPage({ params }: { params: { dashboardId: string } }) {
+export default function DashboardPage({ params, viewMode }: { params: { dashboardId: string }, viewMode: any }) {
   const [refreshInterval] = useState(30); // in seconds
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
