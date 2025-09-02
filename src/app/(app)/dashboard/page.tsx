@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Search, User, Box, MoreVertical, Trash2, LogOut, Pencil, Link as LinkIcon, Star } from 'lucide-react';
+import { Users, Search, User, Box, MoreVertical, Trash2, LogOut, Pencil, Link as LinkIcon, Star, Share2 } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { dashboards as allDashboards, type Dashboard } from '@/lib/mock-data';
@@ -56,7 +56,7 @@ type DashboardActionsProps = {
   onShare: (id: string) => void;
 };
 
-const DashboardActions = ({ dashboard, onDelete, onLeave }: DashboardActionsProps) => {
+const DashboardActions = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onShare }: DashboardActionsProps) => {
   const { toast } = useToast();
 
   const handleDelete = () => {
@@ -97,9 +97,6 @@ const DashboardActions = ({ dashboard, onDelete, onLeave }: DashboardActionsProp
         <DropdownMenuItem disabled={dashboard.role !== 'Owner'}>
           <Pencil className="mr-2" /> Edit
         </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Users className="mr-2" /> Share
-        </DropdownMenuItem>
         <DropdownMenuItem onClick={handleCopyLink}>
           <LinkIcon className="mr-2" /> Copy link
         </DropdownMenuItem>
@@ -131,6 +128,12 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
       description: `"${dashboard.name}" has been updated.`,
     });
   }
+  
+  const handleShare = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onShare(dashboard.id);
+  };
 
   return (
     <Card className="flex flex-col relative">
@@ -170,6 +173,10 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
           <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
           <span className="sr-only">Favorite</span>
         </Button>
+        <Button variant="outline" size="sm" onClick={handleShare}>
+          <Share2 className="h-4 w-4" />
+          <span className="sr-only">Share</span>
+        </Button>
         <DashboardActions dashboard={dashboard} onFavoriteToggle={onFavoriteToggle} onDelete={onDelete} onLeave={onLeave} onShare={onShare}/>
       </CardFooter>
     </Card>
@@ -196,6 +203,12 @@ const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onS
           description: `"${dashboard.name}" has been updated.`,
         });
     }
+
+    const handleShare = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onShare(dashboard.id);
+    };
     
     return (
       <TableRow>
@@ -233,6 +246,10 @@ const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onS
             <Button variant="outline" size="sm" onClick={handleFavorite}>
                 <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
                 <span className="sr-only">Favorite</span>
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleShare}>
+              <Share2 className="h-4 w-4" />
+              <span className="sr-only">Share</span>
             </Button>
             <DashboardActions dashboard={dashboard} onFavoriteToggle={onFavoriteToggle} onDelete={onDelete} onLeave={onLeave} onShare={onShare} />
         </div>
@@ -382,7 +399,7 @@ const sections = [
 export default function DashboardPage() {
   return (
     <div className="space-y-8">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2">
         {sections.map(section => (
           <DashboardSectionCard key={section.href} {...section} />
         ))}
