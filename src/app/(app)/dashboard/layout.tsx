@@ -74,7 +74,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </div>
       
-      {React.cloneElement(children as React.ReactElement, { viewMode })}
+      {React.Children.map(children, child => {
+        if (React.isValidElement(child)) {
+          return React.cloneElement(child, { viewMode } as { viewMode: ViewMode });
+        }
+        return child;
+      })}
     </div>
   );
 }
