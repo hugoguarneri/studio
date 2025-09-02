@@ -26,10 +26,10 @@ export default function NumberedTextarea() {
   }
 
   return (
-    <div className="flex-1 flex border bg-background overflow-hidden relative rounded-md m-4 min-h-[120px]">
+    <div className="flex-1 flex border bg-background overflow-hidden relative rounded-md mx-4 min-h-[120px]">
       <div 
         ref={lineNumbersRef} 
-        className="w-10 text-right p-2 text-muted-foreground select-none overflow-y-hidden bg-muted/30"
+        className="w-10 text-right p-4 text-muted-foreground select-none overflow-y-hidden bg-muted/30"
         aria-hidden="true"
       >
         {Array.from({ length: lineCount }, (_, i) => (
@@ -42,7 +42,7 @@ export default function NumberedTextarea() {
         onChange={handleValueChange}
         onScroll={handleTextareaScroll}
         className={cn(
-          'flex-1 resize-none bg-transparent p-2 text-base font-code ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+          'flex-1 resize-none bg-transparent p-4 text-base font-code ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
           'border-none focus:ring-0'
         )}
         placeholder="SELECT * FROM users;"
