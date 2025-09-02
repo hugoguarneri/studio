@@ -11,7 +11,7 @@ import { usePathname } from 'next/navigation';
 const getPageTitle = (pathname: string) => {
     switch (pathname) {
         case '/dashboard':
-            return 'Dashboards';
+            return 'All Dashboards';
         case '/dashboard/my-dashboards':
             return 'My Dashboards';
         case '/dashboard/favorites':
@@ -33,7 +33,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
 
   const pageTitle = getPageTitle(pathname);
-  const isIndividualDashboard = pathname.match(/^\/dashboard\/(?!my-dashboards|favorites|shared-with-me|groups)[^/]+$/);
+  const isIndividualDashboard = !!pathname.match(/^\/dashboard\/dash_[^/]+$/);
 
   return (
     <div className="flex flex-col gap-6">
