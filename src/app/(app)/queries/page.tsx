@@ -2,8 +2,6 @@
 import QueryEditor from "@/components/query/query-editor";
 import QueryResults from "@/components/query/query-results";
 import DatabaseSchema from "@/components/query/database-schema";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 
 export default function QueriesPage() {
   return (
@@ -14,10 +12,6 @@ export default function QueriesPage() {
           <p className="text-muted-foreground">
             Write, run, and save your database queries.
           </p>
-        </div>
-        <div className="space-y-2 w-full sm:w-72">
-            <Label htmlFor="query-name">Query Name</Label>
-            <Input id="query-name" placeholder="e.g. Monthly Active Users" />
         </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6">

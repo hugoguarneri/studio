@@ -1,17 +1,21 @@
 
 'use client'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { PlayCircle, Save, Sparkles } from "lucide-react"
 import NumberedTextarea from "./numbered-textarea"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet"
 import AIAssistant from "./ai-assistant"
+import { Input } from "../ui/input"
 
 export default function QueryEditor() {
     return (
         <Card className="flex flex-col h-full">
             <CardHeader>
-                <CardTitle className="font-headline text-lg">Query</CardTitle>
+                <Input 
+                    defaultValue="New Query"
+                    className="border-none text-lg font-headline p-0 h-auto focus-visible:ring-0"
+                />
                 <CardDescription>
                     Enter your SQL query below. You can also use the AI assistant to generate one.
                 </CardDescription>
