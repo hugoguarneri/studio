@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { redirect, usePathname } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -14,8 +14,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, Users, LayoutGrid, List, Search } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { dashboards, dashboardGroups } from '@/lib/mock-data';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { dashboards as allDashboards, dashboardGroups } from '@/lib/mock-data';
 import {
   Table,
   TableBody,
@@ -26,7 +25,8 @@ import {
 } from "@/components/ui/table";
 import { PaginationControls } from '@/components/dashboard/pagination-controls';
 import { Input } from '@/components/ui/input';
-import DashboardGroupsView from '@/components/dashboard/dashboard-groups-view';
+import { useState, useEffect } from 'react';
+import DashboardGroupsView from "@/components/dashboard/dashboard-groups-view";
 
 const getRoleStyles = (role: string) => {
   switch (role) {
@@ -39,12 +39,12 @@ const getRoleStyles = (role: string) => {
   }
 };
 
-export const DashboardCard = ({ dashboard }: { dashboard: (typeof dashboards)[0] }) => {
+export const DashboardCard = ({ dashboard }: { dashboard: (typeof allDashboards)[0] }) => {
   return (
     <Card>
       <CardHeader>
         <div className="flex items-start justify-between">
-          <CardTitle className="font-headline text-xl">
+          <CardTitle className="font-headline text-xl truncate">
             {dashboard.name}
           </CardTitle>
           <div
@@ -80,7 +80,7 @@ export const DashboardCard = ({ dashboard }: { dashboard: (typeof dashboards)[0]
   );
 };
 
-const DashboardGrid = ({ dashboards }: { dashboards: (typeof dashboards) }) => (
+const DashboardGrid = ({ dashboards }: { dashboards: (typeof allDashboards) }) => (
   <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
     {dashboards.map(dashboard => (
       <DashboardCard key={dashboard.id} dashboard={dashboard} />
@@ -88,11 +88,11 @@ const DashboardGrid = ({ dashboards }: { dashboards: (typeof dashboards) }) => (
   </div>
 );
 
-const DashboardListItem = ({ dashboard }: { dashboard: (typeof dashboards)[0] }) => (
+const DashboardListItem = ({ dashboard }: { dashboard: (typeof allDashboards)[0] }) => (
   <TableRow>
     <TableCell>
       <div className="flex flex-col">
-        <Link href={`/dashboard/${dashboard.id}`} className="font-medium font-headline text-base hover:underline">
+        <Link href={`/dashboard/${dashboard.id}`} className="font-medium font-headline text-base hover:underline truncate">
           {dashboard.name}
         </Link>
         <span className="text-sm text-muted-foreground truncate">{dashboard.description}</span>
@@ -130,7 +130,7 @@ const DashboardListItem = ({ dashboard }: { dashboard: (typeof dashboards)[0] })
 );
 
 
-export const DashboardList = ({ dashboards }: { dashboards: (typeof dashboards) }) => (
+export const DashboardList = ({ dashboards }: { dashboards: (typeof allDashboards) }) => (
   <Card>
     <Table>
       <TableHeader>
@@ -152,7 +152,7 @@ export const DashboardList = ({ dashboards }: { dashboards: (typeof dashboards) 
 
 export type ViewMode = 'grid' | 'list';
 
-const DashboardView = ({ dashboards, viewMode }: { dashboards: (typeof dashboards), viewMode: ViewMode }) => {
+export const DashboardView = ({ dashboards, viewMode }: { dashboards: (typeof allDashboards), viewMode: ViewMode }) => {
   const ITEMS_PER_PAGE = viewMode === 'list' ? 5 : 6;
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
@@ -221,75 +221,12 @@ const DashboardView = ({ dashboards, viewMode }: { dashboards: (typeof dashboard
   );
 };
 
-
 export default function DashboardListPage() {
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const pathname = usePathname();
+  
+  if (pathname === '/dashboard') {
+    redirect('/dashboard/my-dashboards');
+  }
 
-  const favoriteDashboards = dashboards.filter(d => d.isFavorite);
-  const myDashboards = dashboards.filter(d => d.role === 'Owner');
-  const sharedWithMeDashboards = dashboards.filter(d => d.role !== 'Owner');
-
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold font-headline tracking-tight">
-            Dashboards
-          </h1>
-          <p className="text-muted-foreground">
-            Create, manage, and share your data dashboards.
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-                <Button
-                    variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                    size="icon"
-                    onClick={() => setViewMode('grid')}
-                >
-                    <LayoutGrid className="h-5 w-5" />
-                    <span className="sr-only">Grid View</span>
-                </Button>
-                <Button
-                    variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                    size="icon"
-                    onClick={() => setViewMode('list')}
-                >
-                    <List className="h-5 w-5" />
-                    <span className="sr-only">List View</span>
-                </Button>
-            </div>
-            <Button>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                New Dashboard
-            </Button>
-        </div>
-      </div>
-      
-      <Tabs defaultValue="favorites" className="w-full">
-        <TabsList className="flex flex-wrap h-auto justify-start">
-          <TabsTrigger value="favorites">Favorites</TabsTrigger>
-          <TabsTrigger value="my-dashboards">My Dashboards</TabsTrigger>
-          <TabsTrigger value="shared-with-me">Shared with me</TabsTrigger>
-          <TabsTrigger value="groups">Groups</TabsTrigger>
-        </TabsList>
-        <TabsContent value="my-dashboards" className="mt-6">
-            <DashboardView dashboards={myDashboards} viewMode={viewMode} />
-        </TabsContent>
-        <TabsContent value="favorites" className="mt-6">
-          <DashboardView dashboards={favoriteDashboards} viewMode={viewMode} />
-        </TabsContent>
-        <TabsContent value="shared-with-me" className="mt-6">
-          <DashboardView dashboards={sharedWithMeDashboards} viewMode={viewMode} />
-        </TabsContent>
-        <TabsContent value="groups" className="mt-6">
-          <DashboardGroupsView
-            dashboards={dashboards}
-            groups={dashboardGroups}
-            viewMode={viewMode}
-          />
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
+  return null;
 }

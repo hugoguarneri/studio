@@ -12,12 +12,19 @@ import {
   SidebarFooter,
   SidebarTrigger,
   SidebarInset,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
   Database,
   FileCode,
   Settings,
+  Star,
+  User,
+  Users,
+  Box,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -31,15 +38,26 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronRight } from "lucide-react";
+import { useState } from "react";
 
 const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboards" },
   { href: "/queries", icon: FileCode, label: "Query Editor" },
   { href: "/connections", icon: Database, label: "Connections" },
 ];
 
+const dashboardNavItems = [
+  { href: "/dashboard/favorites", icon: Star, label: "Favorites" },
+  { href: "/dashboard/my-dashboards", icon: User, label: "My Dashboards" },
+  { href: "/dashboard/shared-with-me", icon: Users, label: "Shared with me" },
+  { href: "/dashboard/groups", icon: Box, label: "Groups" },
+];
+
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isDashboardSubpath = dashboardNavItems.some(item => pathname.startsWith(item.href));
+  const [isDashboardMenuOpen, setIsDashboardMenuOpen] = useState(isDashboardSubpath);
 
   return (
     <SidebarProvider>
@@ -67,6 +85,41 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
+            <Collapsible open={isDashboardMenuOpen} onOpenChange={setIsDashboardMenuOpen}>
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton
+                    asChild={false}
+                    isActive={pathname.startsWith('/dashboard')}
+                    className="justify-between"
+                  >
+                     <div className="flex items-center gap-2">
+                      <LayoutDashboard />
+                      <span>Dashboards</span>
+                    </div>
+                    <ChevronRight className={`transition-transform duration-200 ${isDashboardMenuOpen ? 'rotate-90' : ''}`} />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+              </SidebarMenuItem>
+              <CollapsibleContent>
+                <SidebarMenuSub>
+                  {dashboardNavItems.map((item) => (
+                    <SidebarMenuSubItem key={item.href}>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={pathname === item.href}
+                      >
+                        <Link href={item.href}>
+                          <item.icon />
+                          <span>{item.label}</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  ))}
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </Collapsible>
+            
             {navItems.map((item) => (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
