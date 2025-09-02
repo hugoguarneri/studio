@@ -4,9 +4,11 @@
 import DashboardGroupsView from '@/components/dashboard/dashboard-groups-view';
 import { dashboards, dashboardGroups } from '@/lib/mock-data';
 import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function GroupsPage() {
   const [dashboardsState, setDashboardsState] = useState(dashboards);
+  const { toast } = useToast();
 
   const handleFavoriteToggle = (id: string) => {
     setDashboardsState(dashboardsState.map(d => 
@@ -22,17 +24,32 @@ export default function GroupsPage() {
     setDashboardsState(dashboardsState.filter(d => d.id !== id));
   };
 
+  const handleShare = (id: string) => {
+    const dashboard = dashboards.find(d => d.id === id);
+    toast({
+      title: "Shared Dashboard",
+      description: `"${dashboard?.name}" has been shared.`,
+    });
+  }
+
   const actionProps = {
     onFavoriteToggle: handleFavoriteToggle,
     onDelete: handleDelete,
     onLeave: handleLeave,
+    onShare: handleShare,
   };
 
   return (
-    <DashboardGroupsView
-      dashboards={dashboardsState}
-      groups={dashboardGroups}
-      actionProps={actionProps}
-    />
+    <div>
+        <div className="mb-6">
+            <h1 className="text-2xl font-bold font-headline">Groups</h1>
+            <p className="text-muted-foreground">Organize dashboards into groups.</p>
+        </div>
+        <DashboardGroupsView
+            dashboards={dashboardsState}
+            groups={dashboardGroups}
+            actionProps={actionProps}
+        />
+    </div>
   );
 }

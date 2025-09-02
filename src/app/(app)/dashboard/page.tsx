@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -57,7 +56,7 @@ type DashboardActionsProps = {
   onShare: (id: string) => void;
 };
 
-const DashboardActions = ({ dashboard, onDelete, onLeave, onShare }: Omit<DashboardActionsProps, 'onFavoriteToggle'>) => {
+const DashboardActions = ({ dashboard, onDelete, onLeave }: DashboardActionsProps) => {
   const { toast } = useToast();
 
   const handleDelete = () => {
@@ -138,7 +137,7 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
     <Card className="flex flex-col relative">
       <CardHeader>
         <div className="flex items-start justify-between">
-          <CardTitle className="font-headline text-xl truncate pr-2">
+          <CardTitle className="font-headline text-xl truncate pr-10">
             <Link href={`/dashboard/${dashboard.id}`} className="hover:underline">
               {dashboard.name}
             </Link>
@@ -168,14 +167,15 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
         <Button asChild className="flex-1" size="sm">
           <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
         </Button>
-        <Button variant="outline" size="icon" className="w-9 h-9" onClick={handleFavorite}>
+        <Button variant="outline" size="sm" onClick={handleFavorite}>
           <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
           <span className="sr-only">Favorite</span>
         </Button>
-         <Button variant="outline" size="icon" className="w-9 h-9" disabled={dashboard.role !== 'Owner'} onClick={handleShare}>
+         <Button variant="outline" size="sm" disabled={dashboard.role !== 'Owner'} onClick={handleShare}>
           <Users />
+           <span className="sr-only">Share</span>
         </Button>
-        <DashboardActions dashboard={dashboard} onDelete={onDelete} onLeave={onLeave} onShare={onShare}/>
+        <DashboardActions dashboard={dashboard} onFavoriteToggle={onFavoriteToggle} onDelete={onDelete} onLeave={onLeave} onShare={onShare}/>
       </CardFooter>
     </Card>
   );
@@ -247,7 +247,7 @@ const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onS
               <Users />
                <span className="sr-only">Share</span>
             </Button>
-            <DashboardActions dashboard={dashboard} onDelete={onDelete} onLeave={onLeave} onShare={onShare} />
+            <DashboardActions dashboard={dashboard} onFavoriteToggle={onFavoriteToggle} onDelete={onDelete} onLeave={onLeave} onShare={onShare} />
         </div>
         </TableCell>
       </TableRow>
@@ -312,7 +312,12 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
     });
   }
 
-  const actionProps = { onFavoriteToggle: handleFavoriteToggle, onDelete: handleDelete, onLeave: handleLeave, onShare: handleShare };
+  const actionProps = {
+    onFavoriteToggle: handleFavoriteToggle,
+    onDelete: handleDelete,
+    onLeave: handleLeave,
+    onShare: handleShare,
+  };
 
   const filteredDashboards = dashboards.filter(d =>
     d.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -390,16 +395,21 @@ const sections = [
 export default function DashboardPage() {
   return (
     <div className="space-y-8">
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {sections.map(section => (
           <DashboardSectionCard key={section.href} {...section} />
         ))}
       </div>
 
       <div>
-        <h2 className="text-2xl font-bold font-headline mb-4">All Dashboards</h2>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold font-headline">All Dashboards</h1>
+          <p className="text-muted-foreground">Create, manage, and share your data dashboards.</p>
+        </div>
         <DashboardView dashboards={allDashboards} />
       </div>
     </div>
   )
 }
+
+    
