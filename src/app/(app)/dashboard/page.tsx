@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -55,7 +56,7 @@ type DashboardActionsProps = {
   onLeave: (id: string) => void;
 };
 
-const DashboardActions = ({ dashboard, onFavoriteToggle, onDelete, onLeave }: DashboardActionsProps) => {
+const DashboardActions = ({ dashboard, onDelete, onLeave }: Omit<DashboardActionsProps, 'onFavoriteToggle'>) => {
   const { toast } = useToast();
 
   const handleDelete = () => {
@@ -76,34 +77,29 @@ const DashboardActions = ({ dashboard, onFavoriteToggle, onDelete, onLeave }: Da
   }
 
   return (
-    <div className="flex items-center gap-1">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <MoreVertical className="h-4 w-4" />
-            <span className="sr-only">More actions</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem disabled={dashboard.role !== 'Owner'}>
-            <Pencil className="mr-2" /> Edit
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm" className="w-9 p-0">
+          <MoreVertical className="h-4 w-4" />
+          <span className="sr-only">More actions</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem disabled={dashboard.role !== 'Owner'}>
+          <Pencil className="mr-2" /> Edit
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {dashboard.role === 'Owner' ? (
+          <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive">
+            <Trash2 className="mr-2" /> Delete
           </DropdownMenuItem>
-          <DropdownMenuItem disabled={dashboard.role !== 'Owner'}>
-            <Users className="mr-2" /> Share
+        ) : (
+          <DropdownMenuItem onClick={handleLeave}>
+            <LogOut className="mr-2" /> Leave
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          {dashboard.role === 'Owner' ? (
-            <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive">
-              <Trash2 className="mr-2" /> Delete
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuItem onClick={handleLeave}>
-              <LogOut className="mr-2" /> Leave
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 };
 
@@ -113,6 +109,7 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave }
   
   const handleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     onFavoriteToggle(dashboard.id);
     toast({
       title: dashboard.isFavorite ? "Removed from Favorites" : "Added to Favorites",
@@ -122,11 +119,7 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave }
 
   return (
     <Card className="flex flex-col relative">
-       <Button variant="ghost" size="icon" className="absolute top-2 left-2 h-8 w-8 z-10" onClick={handleFavorite}>
-        <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
-        <span className="sr-only">Favorite</span>
-      </Button>
-      <CardHeader className="pt-10">
+      <CardHeader>
         <div className="flex items-start justify-between">
           <CardTitle className="font-headline text-xl truncate pr-2">
             <Link href={`/dashboard/${dashboard.id}`} className="hover:underline">
@@ -157,10 +150,17 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave }
         </div>
       </CardContent>
       <CardFooter className="gap-2">
-        <Button asChild className="w-full">
+        <Button asChild className="w-full" size="sm">
           <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
         </Button>
-        <DashboardActions dashboard={dashboard} onFavoriteToggle={onFavoriteToggle} onDelete={onDelete} onLeave={onLeave} />
+        <Button variant="outline" size="sm" onClick={handleFavorite}>
+          <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
+          <span className="sr-only">Favorite</span>
+        </Button>
+         <Button variant="outline" size="sm" disabled={dashboard.role !== 'Owner'}>
+          <Users />
+        </Button>
+        <DashboardActions dashboard={dashboard} onDelete={onDelete} onLeave={onLeave} />
       </CardFooter>
     </Card>
   );
@@ -179,6 +179,7 @@ const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave }: D
     
     const handleFavorite = (e: React.MouseEvent) => {
         e.preventDefault();
+        e.stopPropagation();
         onFavoriteToggle(dashboard.id);
         toast({
           title: dashboard.isFavorite ? "Removed from Favorites" : "Added to Favorites",
@@ -223,9 +224,12 @@ const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave }: D
         <TableCell className="text-right">
         <div className="flex justify-end items-center gap-2">
             <Button asChild variant="outline" size="sm">
-            <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
+              <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
             </Button>
-            <DashboardActions dashboard={dashboard} onFavoriteToggle={onFavoriteToggle} onDelete={onDelete} onLeave={onLeave} />
+            <Button variant="outline" size="sm" disabled={dashboard.role !== 'Owner'}>
+              <Users />
+            </Button>
+            <DashboardActions dashboard={dashboard} onDelete={onDelete} onLeave={onLeave} />
         </div>
         </TableCell>
       </TableRow>
