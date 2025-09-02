@@ -11,11 +11,11 @@ export default function QueryEditor() {
             <CardHeader>
                 <CardTitle className="font-headline text-lg">Query Editor</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col p-0">
+            <CardContent className="flex-1 flex flex-col">
                 <Textarea
                     id="sql-query"
                     placeholder="SELECT * FROM users;"
-                    className="font-code flex-1 bg-card rounded-none border-0 text-base focus-visible:ring-0"
+                    className="font-code flex-1 bg-background text-base"
                 />
             </CardContent>
             <CardFooter className="justify-end gap-2 p-4 border-t">
