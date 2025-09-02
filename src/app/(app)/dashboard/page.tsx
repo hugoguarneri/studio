@@ -54,9 +54,10 @@ type DashboardActionsProps = {
   onFavoriteToggle: (id: string) => void;
   onDelete: (id: string) => void;
   onLeave: (id: string) => void;
+  onShare: (id: string) => void;
 };
 
-const DashboardActions = ({ dashboard, onDelete, onLeave }: Omit<DashboardActionsProps, 'onFavoriteToggle'>) => {
+const DashboardActions = ({ dashboard, onDelete, onLeave }: Omit<DashboardActionsProps, 'onFavoriteToggle' | 'onShare'>) => {
   const { toast } = useToast();
 
   const handleDelete = () => {
@@ -79,7 +80,7 @@ const DashboardActions = ({ dashboard, onDelete, onLeave }: Omit<DashboardAction
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="w-9 p-0">
+        <Button variant="outline" size="sm" className="w-9 p-0">
           <MoreVertical className="h-4 w-4" />
           <span className="sr-only">More actions</span>
         </Button>
@@ -104,7 +105,7 @@ const DashboardActions = ({ dashboard, onDelete, onLeave }: Omit<DashboardAction
 };
 
 
-export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave }: DashboardActionsProps) => {
+export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onShare }: DashboardActionsProps) => {
   const { toast } = useToast();
   
   const handleFavorite = (e: React.MouseEvent) => {
@@ -119,9 +120,13 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave }
 
   return (
     <Card className="flex flex-col relative">
+       <Button variant="ghost" size="icon" className="absolute top-2 left-2 h-8 w-8" onClick={handleFavorite}>
+          <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
+          <span className="sr-only">Favorite</span>
+      </Button>
       <CardHeader>
         <div className="flex items-start justify-between">
-          <CardTitle className="font-headline text-xl truncate pr-2">
+          <CardTitle className="font-headline text-xl truncate pr-2 pt-8">
             <Link href={`/dashboard/${dashboard.id}`} className="hover:underline">
               {dashboard.name}
             </Link>
@@ -160,21 +165,21 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave }
          <Button variant="outline" size="sm" disabled={dashboard.role !== 'Owner'}>
           <Users />
         </Button>
-        <DashboardActions dashboard={dashboard} onDelete={onDelete} onLeave={onLeave} />
+        <DashboardActions dashboard={dashboard} onDelete={onDelete} onLeave={onLeave} onShare={onShare}/>
       </CardFooter>
     </Card>
   );
 };
 
-const DashboardGrid = ({ dashboards, onFavoriteToggle, onDelete, onLeave }: { dashboards: Dashboard[] } & Omit<DashboardActionsProps, 'dashboard'>) => (
+const DashboardGrid = ({ dashboards, ...actionProps }: { dashboards: Dashboard[] } & Omit<DashboardActionsProps, 'dashboard'>) => (
   <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
     {dashboards.map(dashboard => (
-      <DashboardCard key={dashboard.id} dashboard={dashboard} onFavoriteToggle={onFavoriteToggle} onDelete={onDelete} onLeave={onLeave} />
+      <DashboardCard key={dashboard.id} dashboard={dashboard} {...actionProps} />
     ))}
   </div>
 );
 
-const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave }: DashboardActionsProps) => {
+const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onShare }: DashboardActionsProps) => {
     const { toast } = useToast();
     
     const handleFavorite = (e: React.MouseEvent) => {
@@ -190,17 +195,11 @@ const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave }: D
     return (
       <TableRow>
         <TableCell>
-            <div className="flex items-center gap-3">
-                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleFavorite}>
-                    <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
-                    <span className="sr-only">Favorite</span>
-                </Button>
-                <div className="flex flex-col">
-                    <Link href={`/dashboard/${dashboard.id}`} className="font-medium font-headline text-base hover:underline truncate">
-                    {dashboard.name}
-                    </Link>
-                    <span className="text-sm text-muted-foreground truncate">{dashboard.description}</span>
-                </div>
+            <div className="flex flex-col">
+                <Link href={`/dashboard/${dashboard.id}`} className="font-medium font-headline text-base hover:underline truncate">
+                {dashboard.name}
+                </Link>
+                <span className="text-sm text-muted-foreground truncate">{dashboard.description}</span>
             </div>
         </TableCell>
         <TableCell>
@@ -226,10 +225,14 @@ const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave }: D
             <Button asChild variant="outline" size="sm">
               <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
             </Button>
+            <Button variant="outline" size="sm" onClick={handleFavorite}>
+                <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
+                <span className="sr-only">Favorite</span>
+            </Button>
             <Button variant="outline" size="sm" disabled={dashboard.role !== 'Owner'}>
               <Users />
             </Button>
-            <DashboardActions dashboard={dashboard} onDelete={onDelete} onLeave={onLeave} />
+            <DashboardActions dashboard={dashboard} onDelete={onDelete} onLeave={onLeave} onShare={onShare} />
         </div>
         </TableCell>
       </TableRow>
@@ -237,7 +240,7 @@ const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave }: D
 };
 
 
-export const DashboardList = ({ dashboards, onFavoriteToggle, onDelete, onLeave }: { dashboards: Dashboard[] } & Omit<DashboardActionsProps, 'dashboard'>) => (
+export const DashboardList = ({ dashboards, ...actionProps }: { dashboards: Dashboard[] } & Omit<DashboardActionsProps, 'dashboard'>) => (
   <Card>
     <Table>
       <TableHeader>
@@ -250,7 +253,7 @@ export const DashboardList = ({ dashboards, onFavoriteToggle, onDelete, onLeave 
       </TableHeader>
       <TableBody>
         {dashboards.map(dashboard => (
-          <DashboardListItem key={dashboard.id} dashboard={dashboard} onFavoriteToggle={onFavoriteToggle} onDelete={onDelete} onLeave={onLeave} />
+          <DashboardListItem key={dashboard.id} dashboard={dashboard} {...actionProps} />
         ))}
       </TableBody>
     </Table>
@@ -266,6 +269,7 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
   const [dashboards, setDashboards] = useState(initialDashboards);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const { toast } = useToast();
 
   useEffect(() => {
     setDashboards(initialDashboards);
@@ -284,6 +288,14 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
   const handleLeave = (id: string) => {
     setDashboards(dashboards.filter(d => d.id !== id));
   };
+
+  const handleShare = (id: string) => {
+    const dashboard = dashboards.find(d => d.id === id);
+    toast({
+      title: "Shared Dashboard",
+      description: `"${dashboard?.name}" has been shared.`,
+    });
+  }
 
   const filteredDashboards = dashboards.filter(d =>
     d.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -314,7 +326,7 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
     );
   }
   
-  const actionProps = { onFavoriteToggle: handleFavoriteToggle, onDelete: handleDelete, onLeave: handleLeave };
+  const actionProps = { onFavoriteToggle: handleFavoriteToggle, onDelete: handleDelete, onLeave: handleLeave, onShare: handleShare };
 
   return (
     <div className="space-y-4">
