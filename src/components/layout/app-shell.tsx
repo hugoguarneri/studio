@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Breadcrumbs from "./breadcrumbs";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "All Dashboards", exact: true },
@@ -108,7 +109,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6">
           <SidebarTrigger className="md:hidden" />
           <div className="w-full flex-1">
-            {/* Header content like breadcrumbs can go here */}
+            <Breadcrumbs />
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

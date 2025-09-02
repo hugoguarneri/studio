@@ -5,28 +5,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, LayoutGrid, List } from 'lucide-react';
 import type { ViewMode } from './page';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-
-const getPageTitle = (pathname: string) => {
-    switch (pathname) {
-        case '/dashboard':
-            return 'All Dashboards';
-        case '/dashboard/my-dashboards':
-            return 'My Dashboards';
-        case '/dashboard/favorites':
-            return 'Favorite Dashboards';
-        case '/dashboard/shared-with-me':
-            return 'Shared With Me';
-        case '/dashboard/groups':
-            return 'Dashboard Groups';
-        default:
-            if (pathname.startsWith('/dashboard/')) {
-                return 'Dashboard';
-            }
-            return 'Dashboards';
-    }
-}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -39,22 +19,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return params.toString()
   }
 
-  const pageTitle = getPageTitle(pathname);
-  const isIndividualDashboard = !!pathname.match(/^\/dashboard\/dash_[^/]+$/);
+  const isDashboardSubPage = /^\/dashboard\/(my-dashboards|favorites|shared-with-me|groups)$/.test(pathname);
+  const isAllDashboardsPage = pathname === '/dashboard';
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold font-headline tracking-tight">
-            {pageTitle}
-          </h1>
-          <p className="text-muted-foreground">
-            Create, manage, and share your data dashboards.
-          </p>
+        {/* Title and description are now handled by breadcrumbs */}
         </div>
         <div className="flex items-center gap-4">
-            {!isIndividualDashboard && (
+            {(isDashboardSubPage || isAllDashboardsPage) && (
                 <div className="flex items-center gap-2">
                     <Button
                         variant={viewMode === 'grid' ? 'secondary' : 'ghost'}

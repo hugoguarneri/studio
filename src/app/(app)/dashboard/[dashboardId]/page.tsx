@@ -12,7 +12,7 @@ import SamplePieChart from '@/components/dashboard/sample-pie-chart';
 
 export default function DashboardPage({ params, viewMode }: { params: { dashboardId: string }, viewMode: any }) {
   const [refreshInterval] = useState(30); // in seconds
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [, setLastUpdated] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
@@ -40,10 +40,7 @@ export default function DashboardPage({ params, viewMode }: { params: { dashboar
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold font-headline tracking-tight">Dashboard {params.dashboardId}</h1>
-          <p className="text-muted-foreground">
-            {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : 'Loading...'}
-          </p>
+        {/* Breadcrumbs now handle the title */}
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing}>
