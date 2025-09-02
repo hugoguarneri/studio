@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -231,7 +232,7 @@ const sections = [
 export default function DashboardPage({ viewMode }: { viewMode: ViewMode }) {
   return (
     <div className="space-y-8">
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2">
         {sections.map(section => (
           <DashboardSectionCard key={section.href} {...section} />
         ))}

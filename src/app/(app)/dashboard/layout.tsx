@@ -33,7 +33,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
 
   const pageTitle = getPageTitle(pathname);
-  const isIndividualDashboard = pathname.match(/^\/dashboard\/\w+$/);
+  const isIndividualDashboard = pathname.match(/^\/dashboard\/(?!my-dashboards|favorites|shared-with-me|groups)[^/]+$/);
 
   return (
     <div className="flex flex-col gap-6">
