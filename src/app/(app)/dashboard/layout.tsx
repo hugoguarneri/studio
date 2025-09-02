@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import React, { useState } from 'react';
@@ -6,12 +7,11 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, LayoutGrid, List } from 'lucide-react';
 import type { ViewMode } from './page';
 import { usePathname } from 'next/navigation';
-import Link from 'next/link';
 
 const getPageTitle = (pathname: string) => {
     switch (pathname) {
         case '/dashboard':
-            return 'All Dashboards';
+            return 'Dashboards';
         case '/dashboard/my-dashboards':
             return 'My Dashboards';
         case '/dashboard/favorites':
@@ -67,16 +67,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </Button>
                 </div>
             )}
-            {!isIndividualDashboard && (
-              <Button>
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  New Dashboard
-              </Button>
-            )}
+            <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                New Dashboard
+            </Button>
         </div>
       </div>
       
-      {/* Pass viewMode to children */}
       {React.cloneElement(children as React.ReactElement, { viewMode })}
     </div>
   );

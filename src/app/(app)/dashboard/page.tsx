@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Search } from 'lucide-react';
+import { Users, Search, Star, User, Box } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { dashboards as allDashboards } from '@/lib/mock-data';
@@ -25,6 +25,7 @@ import {
 import { PaginationControls } from '@/components/dashboard/pagination-controls';
 import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
+import DashboardSectionCard from '@/components/dashboard/dashboard-section-card';
 
 const getRoleStyles = (role: string) => {
   switch (role) {
@@ -219,6 +220,27 @@ export const DashboardView = ({ dashboards, viewMode }: { dashboards: (typeof al
   );
 };
 
+
+const sections = [
+  { icon: User, title: "My Dashboards", description: "Dashboards you have created or own.", href: "/dashboard/my-dashboards" },
+  { icon: Star, title: "Favorites", description: "Your bookmarked dashboards.", href: "/dashboard/favorites" },
+  { icon: Users, title: "Shared with me", description: "Dashboards shared by other users.", href: "/dashboard/shared-with-me" },
+  { icon: Box, title: "Groups", description: "Organize dashboards into groups.", href: "/dashboard/groups" },
+];
+
 export default function DashboardPage({ viewMode }: { viewMode: ViewMode }) {
-  return <DashboardView dashboards={allDashboards} viewMode={viewMode} />;
+  return (
+    <div className="space-y-8">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {sections.map(section => (
+          <DashboardSectionCard key={section.href} {...section} />
+        ))}
+      </div>
+
+      <div>
+        <h2 className="text-2xl font-bold font-headline mb-4">All Dashboards</h2>
+        <DashboardView dashboards={allDashboards} viewMode={viewMode} />
+      </div>
+    </div>
+  )
 }
