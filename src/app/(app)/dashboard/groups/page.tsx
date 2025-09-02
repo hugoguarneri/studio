@@ -40,16 +40,10 @@ export default function GroupsPage() {
   };
 
   return (
-    <div>
-        <div className="mb-6">
-            <h1 className="text-2xl font-bold font-headline">Groups</h1>
-            <p className="text-muted-foreground">Organize dashboards into groups.</p>
-        </div>
-        <DashboardGroupsView
-            dashboards={dashboardsState}
-            groups={dashboardGroups}
-            actionProps={actionProps}
-        />
-    </div>
+    <DashboardGroupsView
+        dashboards={dashboardsState}
+        groups={dashboardGroups}
+        actionProps={actionProps}
+    />
   );
 }
