@@ -11,10 +11,10 @@ export default function QueriesPage() {
       </div>
       <div className="flex flex-col gap-6 min-h-0">
         <div className="flex flex-col flex-1 min-h-0">
-            <QueryEditor />
+          <QueryEditor />
         </div>
         <div className="flex-1">
-            <QueryResults />
+          <QueryResults />
         </div>
       </div>
     </div>

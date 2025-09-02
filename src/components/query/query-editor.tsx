@@ -1,21 +1,24 @@
 
 'use client'
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { PlayCircle, Save } from "lucide-react"
 
 export default function QueryEditor() {
     return (
-        <Card className="flex flex-col h-full shadow-none border-0">
+        <Card className="flex flex-col h-full">
+            <CardHeader>
+                <CardTitle className="font-headline text-lg">Query Editor</CardTitle>
+            </CardHeader>
             <CardContent className="flex-1 flex flex-col p-0">
                 <Textarea
                     id="sql-query"
                     placeholder="SELECT * FROM users;"
-                    className="font-code flex-1 bg-card rounded-md border text-base"
+                    className="font-code flex-1 bg-card rounded-none border-0 text-base focus-visible:ring-0"
                 />
             </CardContent>
-            <CardFooter className="justify-end gap-2 p-0 pt-4">
+            <CardFooter className="justify-end gap-2 p-4 border-t">
                 <Button variant="outline">
                     <Save className="mr-2 size-4" />
                     Save
