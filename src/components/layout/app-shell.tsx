@@ -56,7 +56,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <Sidebar>
-        <SidebarHeader>
+        <SidebarHeader className="mt-4">
           <div className="flex items-center gap-3">
             <svg
               className="size-8 text-primary"
