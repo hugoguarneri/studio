@@ -181,13 +181,10 @@ export default function DatabaseSchema() {
                                         <div className="flex flex-col gap-1.5">
                                             {table.columns.map(col => (
                                                 <div key={col.name} className="text-xs text-muted-foreground py-1 px-2 flex items-center justify-between">
-                                                    <div>
-                                                        {col.name}
-                                                        <span className='text-muted-foreground/70 ml-2'>({col.type})</span>
-                                                    </div>
-                                                    {col.key && (
-                                                        <Badge variant="outline" className="h-5 text-xs font-mono">{col.key}</Badge>
-                                                    )}
+                                                    <span>
+                                                        {col.name}({col.type})
+                                                        {col.key && <span className="font-mono text-foreground/70"> - {col.key}</span>}
+                                                    </span>
                                                 </div>
                                             ))}
                                         </div>
