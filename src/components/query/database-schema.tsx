@@ -15,20 +15,124 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
 import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
 
 const schemaContent = [
-    { name: 'users', columns: ['id', 'name', 'email', 'signup_date', 'last_login'] },
-    { name: 'orders', columns: ['id', 'user_id', 'amount', 'created_at', 'status'] },
-    { name: 'products', columns: ['id', 'name', 'price', 'category', 'stock_quantity'] },
-    { name: 'sessions', columns: ['id', 'user_id', 'start_time', 'end_time', 'ip_address'] },
-    { name: 'events', columns: ['id', 'name', 'properties', 'timestamp'] },
-    { name: 'pageviews', columns: ['id', 'path', 'user_id', 'timestamp', 'referrer'] },
-    { name: 'employees', columns: ['employee_id', 'first_name', 'last_name', 'hire_date', 'department_id'] },
-    { name: 'departments', columns: ['department_id', 'department_name', 'manager_id'] },
-    { name: 'customers', columns: ['customer_id', 'company_name', 'contact_name', 'country'] },
-    { name: 'suppliers', columns: ['supplier_id', 'company_name', 'contact_name', 'city', 'country'] },
-    { name: 'invoices', columns: ['invoice_id', 'customer_id', 'invoice_date', 'total_amount'] },
-    { name: 'invoice_items', columns: ['item_id', 'invoice_id', 'product_id', 'quantity', 'unit_price'] },
+    { 
+        name: 'users', 
+        columns: [
+            { name: 'id', type: 'int', key: 'PK' },
+            { name: 'name', type: 'varchar(255)' },
+            { name: 'email', type: 'varchar(255)' },
+            { name: 'signup_date', type: 'timestamp' },
+            { name: 'last_login', type: 'timestamp' },
+        ] 
+    },
+    { 
+        name: 'orders', 
+        columns: [
+            { name: 'id', type: 'int', key: 'PK' },
+            { name: 'user_id', type: 'int', key: 'FK' },
+            { name: 'amount', type: 'decimal(10, 2)' },
+            { name: 'created_at', type: 'timestamp' },
+            { name: 'status', type: 'varchar(50)' },
+        ] 
+    },
+    { 
+        name: 'products', 
+        columns: [
+            { name: 'id', type: 'int', key: 'PK' },
+            { name: 'name', type: 'varchar(255)' },
+            { name: 'price', type: 'decimal(10, 2)' },
+            { name: 'category', type: 'varchar(100)' },
+            { name: 'stock_quantity', type: 'int' },
+        ] 
+    },
+    { 
+        name: 'sessions', 
+        columns: [
+            { name: 'id', type: 'varchar(255)', key: 'PK' },
+            { name: 'user_id', type: 'int', key: 'FK' },
+            { name: 'start_time', type: 'timestamp' },
+            { name: 'end_time', type: 'timestamp' },
+            { name: 'ip_address', type: 'varchar(45)' },
+        ] 
+    },
+    { 
+        name: 'events', 
+        columns: [
+            { name: 'id', type: 'int', key: 'PK' },
+            { name: 'name', type: 'varchar(255)' },
+            { name: 'properties', type: 'json' },
+            { name: 'timestamp', type: 'timestamp' },
+        ] 
+    },
+    { 
+        name: 'pageviews', 
+        columns: [
+            { name: 'id', type: 'int', key: 'PK' },
+            { name: 'path', type: 'varchar(255)' },
+            { name: 'user_id', type: 'int', key: 'FK' },
+            { name: 'timestamp', type: 'timestamp' },
+            { name: 'referrer', type: 'varchar(255)' },
+        ] 
+    },
+    { 
+        name: 'employees', 
+        columns: [
+            { name: 'employee_id', type: 'int', key: 'PK' },
+            { name: 'first_name', type: 'varchar(100)' },
+            { name: 'last_name', type: 'varchar(100)' },
+            { name: 'hire_date', type: 'date' },
+            { name: 'department_id', type: 'int', key: 'FK' },
+        ] 
+    },
+    { 
+        name: 'departments', 
+        columns: [
+            { name: 'department_id', type: 'int', key: 'PK' },
+            { name: 'department_name', type: 'varchar(100)' },
+            { name: 'manager_id', type: 'int', key: 'FK' },
+        ] 
+    },
+    { 
+        name: 'customers', 
+        columns: [
+            { name: 'customer_id', type: 'varchar(10)', key: 'PK' },
+            { name: 'company_name', type: 'varchar(255)' },
+            { name: 'contact_name', type: 'varchar(255)' },
+            { name: 'country', type: 'varchar(100)' },
+        ] 
+    },
+    { 
+        name: 'suppliers', 
+        columns: [
+            { name: 'supplier_id', type: 'int', key: 'PK' },
+            { name: 'company_name', type: 'varchar(255)' },
+            { name: 'contact_name', type: 'varchar(255)' },
+            { name: 'city', type: 'varchar(100)' },
+            { name: 'country', type: 'varchar(100)' },
+        ] 
+    },
+    { 
+        name: 'invoices', 
+        columns: [
+            { name: 'invoice_id', type: 'int', key: 'PK' },
+            { name: 'customer_id', type: 'varchar(10)', key: 'FK' },
+            { name: 'invoice_date', type: 'date' },
+            { name: 'total_amount', type: 'decimal(10, 2)' },
+        ] 
+    },
+    { 
+        name: 'invoice_items', 
+        columns: [
+            { name: 'item_id', type: 'int', key: 'PK' },
+            { name: 'invoice_id', type: 'int', key: 'FK' },
+            { name: 'product_id', type: 'int', key: 'FK' },
+            { name: 'quantity', type: 'int' },
+            { name: 'unit_price', type: 'decimal(10, 2)' },
+        ] 
+    },
 ];
 
 export default function DatabaseSchema() {
@@ -65,8 +169,8 @@ export default function DatabaseSchema() {
                         </AccordionTrigger>
                         <AccordionContent>
                             <Accordion type="multiple" className="space-y-1">
-                                {schemaContent.map(table => (
-                                <AccordionItem key={table.name} value={table.name}>
+                                {schemaContent.map((table, index) => (
+                                <AccordionItem key={table.name} value={table.name} className={index === schemaContent.length - 1 ? 'border-b-0' : ''}>
                                     <AccordionTrigger className="text-xs py-1.5 px-2 hover:bg-muted rounded-md">
                                         <div className='flex items-center gap-2'>
                                             <Table2Icon className="h-3 w-3" />
@@ -74,9 +178,17 @@ export default function DatabaseSchema() {
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent className="pl-4 pt-1 pb-0">
-                                        <div className="flex flex-col gap-1">
+                                        <div className="flex flex-col gap-1.5">
                                             {table.columns.map(col => (
-                                                <div key={col} className="text-xs text-muted-foreground py-1 px-2">{col}</div>
+                                                <div key={col.name} className="text-xs text-muted-foreground py-1 px-2 flex items-center justify-between">
+                                                    <div>
+                                                        {col.name}
+                                                        <span className='text-muted-foreground/70 ml-2'>({col.type})</span>
+                                                    </div>
+                                                    {col.key && (
+                                                        <Badge variant="outline" className="h-5 text-xs font-mono">{col.key}</Badge>
+                                                    )}
+                                                </div>
                                             ))}
                                         </div>
                                     </AccordionContent>
