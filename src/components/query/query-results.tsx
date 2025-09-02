@@ -22,6 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { BarChart, Eye, Settings, Table2 } from 'lucide-react';
 import SampleBarChart from '../dashboard/sample-bar-chart';
+import { ScrollArea } from '../ui/scroll-area';
 
 const ChartSettings = () => (
     <div className="flex items-center gap-4">
@@ -74,36 +75,38 @@ export default function QueryResults() {
           </div>
 
           <TabsContent value="data">
-            <div className="w-full rounded-md border mt-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Order ID</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentOrders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-medium font-code">
-                        {order.id}
-                      </TableCell>
-                      <TableCell>{order.customer}</TableCell>
-                      <TableCell>
-                        <Badge variant={getStatusVariant(order.status) as any}>
-                          {order.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right font-code">
-                        ${order.amount.toFixed(2)}
-                      </TableCell>
+            <ScrollArea className="h-[350px] w-full mt-4">
+                <div className="w-full rounded-md border">
+                <Table>
+                    <TableHeader>
+                    <TableRow>
+                        <TableHead>Order ID</TableHead>
+                        <TableHead>Customer</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                    </TableHeader>
+                    <TableBody>
+                    {recentOrders.map((order) => (
+                        <TableRow key={order.id}>
+                        <TableCell className="font-medium font-code">
+                            {order.id}
+                        </TableCell>
+                        <TableCell>{order.customer}</TableCell>
+                        <TableCell>
+                            <Badge variant={getStatusVariant(order.status) as any}>
+                            {order.status}
+                            </Badge>
+                        </TableCell>
+                        <TableCell className="text-right font-code">
+                            ${order.amount.toFixed(2)}
+                        </TableCell>
+                        </TableRow>
+                    ))}
+                    </TableBody>
+                </Table>
+                </div>
+            </ScrollArea>
           </TabsContent>
           <TabsContent value="chart" className="h-[350px]">
             <SampleBarChart />

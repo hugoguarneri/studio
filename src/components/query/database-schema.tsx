@@ -48,7 +48,7 @@ export default function DatabaseSchema() {
                 </Button>
             </div>
             
-            <ScrollArea className="flex-1">
+            <ScrollArea className="flex-1 h-[240px]">
                 <Accordion type="multiple" defaultValue={['tables']} className="pr-2">
                     <AccordionItem value="tables">
                         <AccordionTrigger className="text-sm font-semibold">
