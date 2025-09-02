@@ -14,7 +14,7 @@ export default function QueryEditor() {
             <CardHeader className="p-4 pb-0">
                 <Input 
                     defaultValue="New Query"
-                    className="border-none text-xl font-semibold h-auto p-2 focus-visible:ring-0 font-headline -mx-2"
+                    className="border-none text-xl font-semibold h-auto p-2 focus-visible:ring-0 font-headline"
                 />
                 <CardDescription className="mt-2 mb-2">
                     Enter your SQL query below. You can also use the AI assistant to generate one.
