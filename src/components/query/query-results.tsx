@@ -22,24 +22,6 @@ import { Button } from '@/components/ui/button';
 import { BarChart, Settings, Table2 } from 'lucide-react';
 import SampleBarChart from '../dashboard/sample-bar-chart';
 import { ScrollArea, ScrollBar } from '../ui/scroll-area';
-import { Resizable } from 'react-resizable';
-import React, { useState } from 'react';
-import { cn } from '@/lib/utils';
-import 'react-resizable/css/styles.css';
-
-const ResizableHeader = ({ onResize, width, children, className }: { onResize: any, width: number, children: React.ReactNode, className?: string }) => (
-  <Resizable
-    width={width || 150}
-    height={0}
-    handle={<span className="absolute bottom-0 right-0 top-0 w-1 cursor-col-resize bg-border" />}
-    onResize={onResize}
-    draggableOpts={{ enableUserSelectHack: false }}
-  >
-    <TableHead style={{ width: `${width}px` }} className={cn("sticky top-0 z-10 bg-card", className)}>
-        {children}
-    </TableHead>
-  </Resizable>
-);
 
 const ChartSettings = () => (
     <div className="flex items-center gap-4">
@@ -52,31 +34,16 @@ const ChartSettings = () => (
 )
 
 export default function QueryResults() {
-    const initialWidths = {
-        id: 150,
-        customer: 200,
-        product: 200,
-        quantity: 100,
-        status: 120,
-        amount: 150,
-        country: 150,
-    };
-    const [widths, setWidths] = useState(initialWidths);
-
-    const handleResize = (key: keyof typeof initialWidths) => (e: any, { size }: any) => {
-        setWidths(prev => ({ ...prev, [key]: size.width }));
-    };
-  
-    return (
-    <Card>
+  return (
+    <Card className="flex flex-col h-full">
       <CardHeader>
         <CardTitle className="font-headline">Results</CardTitle>
         <CardDescription>
           The output of your query will be displayed here.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="data">
+      <CardContent className="flex flex-col flex-1 min-h-0">
+        <Tabs defaultValue="data" className="flex flex-col flex-1">
           <div className="flex justify-between items-start">
             <TabsList>
               <TabsTrigger value="data">
@@ -93,40 +60,25 @@ export default function QueryResults() {
             </TabsContent>
           </div>
 
-          <TabsContent value="data">
-            <ScrollArea className="w-full whitespace-nowrap rounded-md border mt-4">
-              <div className="h-[350px]">
-                <Table>
-                    <TableHeader>
+          <TabsContent value="data" className="flex-1 flex flex-col mt-4 min-h-0">
+            <ScrollArea className="flex-1 relative">
+                <Table className="h-full">
+                    <TableHeader className="sticky top-0 bg-card z-10">
                     <TableRow>
-                        <TableHead className="sticky top-0 z-10 bg-card w-[50px]">Row</TableHead>
-                        <ResizableHeader onResize={handleResize('id')} width={widths.id}>
-                            Order ID
-                        </ResizableHeader>
-                        <ResizableHeader onResize={handleResize('customer')} width={widths.customer}>
-                            Customer
-                        </ResizableHeader>
-                        <ResizableHeader onResize={handleResize('product')} width={widths.product}>
-                            Product
-                        </ResizableHeader>
-                        <ResizableHeader onResize={handleResize('quantity')} width={widths.quantity} className="text-right">
-                            Quantity
-                        </ResizableHeader>
-                        <ResizableHeader onResize={handleResize('status')} width={widths.status}>
-                            Status
-                        </ResizableHeader>
-                        <ResizableHeader onResize={handleResize('amount')} width={widths.amount} className="text-right">
-                           Amount
-                        </ResizableHeader>
-                         <ResizableHeader onResize={handleResize('country')} width={widths.country}>
-                            Country
-                        </ResizableHeader>
+                        <TableHead className="sticky left-0 bg-card w-[60px]">Row</TableHead>
+                        <TableHead>Order ID</TableHead>
+                        <TableHead>Customer</TableHead>
+                        <TableHead>Product</TableHead>
+                        <TableHead className="text-right">Quantity</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead>Country</TableHead>
                     </TableRow>
                     </TableHeader>
                     <TableBody>
                     {recentOrders.map((order, index) => (
                         <TableRow key={order.id}>
-                        <TableCell className="text-muted-foreground">{index + 1}</TableCell>
+                        <TableCell className="sticky left-0 bg-card text-muted-foreground">{index + 1}</TableCell>
                         <TableCell className="font-medium font-code">
                             {order.id}
                         </TableCell>
@@ -144,7 +96,6 @@ export default function QueryResults() {
                     ))}
                     </TableBody>
                 </Table>
-              </div>
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
           </TabsContent>
