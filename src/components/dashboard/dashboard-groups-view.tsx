@@ -73,7 +73,7 @@ const GroupCard = ({
 }) => {
   return (
     <AccordionItem value={group.id} className="border-0">
-      <AccordionTrigger className="py-2 px-4 hover:no-underline rounded-md bg-card shadow-sm data-[state=closed]:border-b-0 flex items-center">
+      <AccordionTrigger className="py-2 px-4 hover:no-underline rounded-md bg-muted shadow-sm data-[state=closed]:border-b-0 flex items-center">
           <h2 className="text-xl font-bold font-headline">{group.name}</h2>
       </AccordionTrigger>
       <AccordionContent className="pt-6">
