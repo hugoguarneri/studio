@@ -37,12 +37,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Breadcrumbs from "./breadcrumbs";
 
-const navItems = [
+const dashboardNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "All Dashboards", exact: true },
   { href: "/dashboard/my-dashboards", icon: User, label: "My Dashboards" },
   { href: "/dashboard/favorites", icon: Star, label: "Favorites" },
   { href: "/dashboard/shared-with-me", icon: Users, label: "Shared with me" },
   { href: "/dashboard/groups", icon: Box, label: "Groups" },
+];
+
+const databaseNavItems = [
   { href: "/queries", icon: FileCode, label: "Query Editor" },
   { href: "/connections", icon: Database, label: "Connections" },
 ];
@@ -75,22 +78,46 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarMenu>
-            {navItems.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={item.exact ? pathname === item.href : pathname.startsWith(item.href)}
-                  tooltip={item.label}
-                >
-                  <Link href={item.href}>
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
+          <div className="flex flex-col gap-4">
+            <div>
+              <h2 className="px-2 mb-2 text-xs font-semibold text-sidebar-foreground/50 tracking-wider">Dashboards</h2>
+              <SidebarMenu>
+                {dashboardNavItems.map((item) => (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={item.exact ? pathname === item.href : pathname.startsWith(item.href)}
+                      tooltip={item.label}
+                    >
+                      <Link href={item.href}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </div>
+            <div>
+              <h2 className="px-2 mb-2 text-xs font-semibold text-sidebar-foreground/50 tracking-wider">Data Base</h2>
+              <SidebarMenu>
+                {databaseNavItems.map((item) => (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={item.exact ? pathname === item.href : pathname.startsWith(item.href)}
+                      tooltip={item.label}
+                    >
+                      <Link href={item.href}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </div>
+          </div>
         </SidebarContent>
         <SidebarFooter>
           <SidebarMenu>
