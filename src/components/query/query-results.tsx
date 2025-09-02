@@ -16,13 +16,30 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { recentOrders } from '@/lib/mock-data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { BarChart, Eye, Settings, Table2 } from 'lucide-react';
+import { BarChart, Settings, Table2 } from 'lucide-react';
 import SampleBarChart from '../dashboard/sample-bar-chart';
-import { ScrollArea } from '../ui/scroll-area';
+import { ScrollArea, ScrollBar } from '../ui/scroll-area';
+import { Resizable } from 'react-resizable';
+import React, { useState } from 'react';
+import { cn } from '@/lib/utils';
+import 'react-resizable/css/styles.css';
+
+const ResizableHeader = ({ onResize, width, children, className }: { onResize: any, width: number, children: React.ReactNode, className?: string }) => (
+  <Resizable
+    width={width || 150}
+    height={0}
+    handle={<span className="absolute bottom-0 right-0 top-0 w-1 cursor-col-resize bg-border" />}
+    onResize={onResize}
+    draggableOpts={{ enableUserSelectHack: false }}
+  >
+    <TableHead style={{ width: `${width}px` }} className={cn("sticky top-0 z-10 bg-card", className)}>
+        {children}
+    </TableHead>
+  </Resizable>
+);
 
 const ChartSettings = () => (
     <div className="flex items-center gap-4">
@@ -35,20 +52,19 @@ const ChartSettings = () => (
 )
 
 export default function QueryResults() {
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case 'Fulfilled':
-        return 'default';
-      case 'Processing':
-        return 'secondary';
-      case 'Cancelled':
-        return 'destructive';
-      default:
-        return 'outline';
-    }
-  };
+    const initialWidths = {
+        id: 150,
+        customer: 200,
+        status: 120,
+        amount: 150,
+    };
+    const [widths, setWidths] = useState(initialWidths);
 
-  return (
+    const handleResize = (key: keyof typeof initialWidths) => (e: any, { size }: any) => {
+        setWidths(prev => ({ ...prev, [key]: size.width }));
+    };
+  
+    return (
     <Card>
       <CardHeader>
         <CardTitle className="font-headline">Results</CardTitle>
@@ -75,15 +91,22 @@ export default function QueryResults() {
           </div>
 
           <TabsContent value="data">
-            <ScrollArea className="h-[350px] w-full mt-4">
-                <div className="w-full rounded-md border">
+            <ScrollArea className="h-[350px] w-full mt-4 rounded-md border">
                 <Table>
                     <TableHeader>
                     <TableRow>
-                        <TableHead>Order ID</TableHead>
-                        <TableHead>Customer</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
+                        <ResizableHeader onResize={handleResize('id')} width={widths.id}>
+                            Order ID
+                        </ResizableHeader>
+                        <ResizableHeader onResize={handleResize('customer')} width={widths.customer}>
+                            Customer
+                        </ResizableHeader>
+                        <ResizableHeader onResize={handleResize('status')} width={widths.status}>
+                            Status
+                        </ResizableHeader>
+                        <ResizableHeader onResize={handleResize('amount')} width={widths.amount} className="text-right">
+                           Amount
+                        </ResizableHeader>
                     </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -94,9 +117,7 @@ export default function QueryResults() {
                         </TableCell>
                         <TableCell>{order.customer}</TableCell>
                         <TableCell>
-                            <Badge variant={getStatusVariant(order.status) as any}>
-                            {order.status}
-                            </Badge>
+                           {order.status}
                         </TableCell>
                         <TableCell className="text-right font-code">
                             ${order.amount.toFixed(2)}
@@ -105,7 +126,7 @@ export default function QueryResults() {
                     ))}
                     </TableBody>
                 </Table>
-                </div>
+                <ScrollBar orientation="horizontal" />
             </ScrollArea>
           </TabsContent>
           <TabsContent value="chart" className="h-[350px]">
