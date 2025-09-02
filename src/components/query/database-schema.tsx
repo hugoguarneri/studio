@@ -183,7 +183,7 @@ export default function DatabaseSchema() {
                                                 <div key={col.name} className="text-xs text-muted-foreground py-1 px-2 flex items-center justify-between">
                                                     <span>
                                                         {col.name}({col.type})
-                                                        {col.key && <span className="font-mono text-foreground/70"> - {col.key}</span>}
+                                                        {col.key && <span> - {col.key}</span>}
                                                     </span>
                                                 </div>
                                             ))}
