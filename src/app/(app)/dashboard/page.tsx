@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Search, Star, User, Box, MoreVertical, Trash2, LogOut, Pencil } from 'lucide-react';
+import { Users, Search, Star, User, Box, MoreVertical, Trash2, LogOut, Pencil, Link as LinkIcon } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { dashboards as allDashboards, type Dashboard } from '@/lib/mock-data';
@@ -57,7 +57,7 @@ type DashboardActionsProps = {
   onShare: (id: string) => void;
 };
 
-const DashboardActions = ({ dashboard, onDelete, onLeave }: Omit<DashboardActionsProps, 'onFavoriteToggle' | 'onShare'>) => {
+const DashboardActions = ({ dashboard, onDelete, onLeave, onShare }: Omit<DashboardActionsProps, 'onFavoriteToggle'>) => {
   const { toast } = useToast();
 
   const handleDelete = () => {
@@ -76,11 +76,20 @@ const DashboardActions = ({ dashboard, onDelete, onLeave }: Omit<DashboardAction
       description: `You have left "${dashboard.name}".`,
     });
   }
+  
+  const handleCopyLink = () => {
+    const url = `${window.location.origin}/dashboard/${dashboard.id}`;
+    navigator.clipboard.writeText(url);
+    toast({
+      title: "Link Copied",
+      description: "Dashboard link copied to clipboard.",
+    });
+  };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="w-9 p-0">
+        <Button variant="outline" size="icon" className="w-9 h-9">
           <MoreVertical className="h-4 w-4" />
           <span className="sr-only">More actions</span>
         </Button>
@@ -88,6 +97,9 @@ const DashboardActions = ({ dashboard, onDelete, onLeave }: Omit<DashboardAction
       <DropdownMenuContent align="end">
         <DropdownMenuItem disabled={dashboard.role !== 'Owner'}>
           <Pencil className="mr-2" /> Edit
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleCopyLink}>
+          <LinkIcon className="mr-2" /> Copy link
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {dashboard.role === 'Owner' ? (
@@ -117,6 +129,10 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
       description: `"${dashboard.name}" has been updated.`,
     });
   }
+  
+  const handleShare = () => {
+    onShare(dashboard.id);
+  };
 
   return (
     <Card className="flex flex-col relative">
@@ -127,14 +143,12 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
               {dashboard.name}
             </Link>
           </CardTitle>
-          <div className="flex items-center gap-2">
-            <div
-              className={`text-xs font-medium py-1 px-2 rounded-md border ${getRoleStyles(
-                dashboard.role
-              )}`}
-            >
-              {dashboard.role}
-            </div>
+          <div
+            className={`text-xs font-medium py-1 px-2 rounded-md border ${getRoleStyles(
+              dashboard.role
+            )}`}
+          >
+            {dashboard.role}
           </div>
         </div>
         <CardDescription className="truncate h-10">{dashboard.description}</CardDescription>
@@ -151,14 +165,14 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
         </div>
       </CardContent>
       <CardFooter className="gap-2">
-        <Button asChild className="w-full" size="sm">
+        <Button asChild className="flex-1" size="sm">
           <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
         </Button>
-        <Button variant="outline" size="sm" onClick={handleFavorite}>
+        <Button variant="outline" size="icon" className="w-9 h-9" onClick={handleFavorite}>
           <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
           <span className="sr-only">Favorite</span>
         </Button>
-         <Button variant="outline" size="sm" disabled={dashboard.role !== 'Owner'}>
+         <Button variant="outline" size="icon" className="w-9 h-9" disabled={dashboard.role !== 'Owner'} onClick={handleShare}>
           <Users />
         </Button>
         <DashboardActions dashboard={dashboard} onDelete={onDelete} onLeave={onLeave} onShare={onShare}/>
@@ -187,6 +201,10 @@ const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onS
           description: `"${dashboard.name}" has been updated.`,
         });
     }
+
+    const handleShare = () => {
+      onShare(dashboard.id);
+    };
     
     return (
       <TableRow>
@@ -225,8 +243,9 @@ const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onS
                 <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
                 <span className="sr-only">Favorite</span>
             </Button>
-            <Button variant="outline" size="sm" disabled={dashboard.role !== 'Owner'}>
+            <Button variant="outline" size="sm" disabled={dashboard.role !== 'Owner'} onClick={handleShare}>
               <Users />
+               <span className="sr-only">Share</span>
             </Button>
             <DashboardActions dashboard={dashboard} onDelete={onDelete} onLeave={onLeave} onShare={onShare} />
         </div>
@@ -293,6 +312,8 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
     });
   }
 
+  const actionProps = { onFavoriteToggle: handleFavoriteToggle, onDelete: handleDelete, onLeave: handleLeave, onShare: handleShare };
+
   const filteredDashboards = dashboards.filter(d =>
     d.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -322,8 +343,6 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
     );
   }
   
-  const actionProps = { onFavoriteToggle: handleFavoriteToggle, onDelete: handleDelete, onLeave: handleLeave, onShare: handleShare };
-
   return (
     <div className="space-y-4">
       <div className="relative w-full md:w-64">
