@@ -94,7 +94,8 @@ export default function QueryResults() {
           </div>
 
           <TabsContent value="data">
-            <ScrollArea className="h-[350px] w-full mt-4 rounded-md border">
+            <ScrollArea className="w-full whitespace-nowrap rounded-md border mt-4">
+              <div className="h-[350px]">
                 <Table>
                     <TableHeader>
                     <TableRow>
@@ -143,7 +144,8 @@ export default function QueryResults() {
                     ))}
                     </TableBody>
                 </Table>
-                <ScrollBar orientation="horizontal" />
+              </div>
+              <ScrollBar orientation="horizontal" />
             </ScrollArea>
           </TabsContent>
           <TabsContent value="chart" className="h-[350px]">
