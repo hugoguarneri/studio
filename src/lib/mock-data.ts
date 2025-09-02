@@ -1,3 +1,17 @@
+export type Dashboard = {
+  id: string;
+  name: string;
+  description: string;
+  role: 'Owner' | 'Editor' | 'Viewer';
+  owner: {
+    name: string;
+    avatarUrl: string;
+  };
+  isFavorite: boolean;
+  lastViewed: Date;
+  groupId: string | null;
+};
+
 export const salesData = [
   { month: 'Jan', sales: 4000, revenue: 2400 },
   { month: 'Feb', sales: 3000, revenue: 1398 },
@@ -43,7 +57,7 @@ export const savedQueries = [
     { id: 'q3', name: 'New Signups by Source', content: 'SELECT signup_source, count(*) FROM users GROUP BY 1;' },
 ];
 
-export const dashboards = [
+export const dashboards: Dashboard[] = [
   {
     id: 'dash_1',
     name: 'Q3 Sales Performance',

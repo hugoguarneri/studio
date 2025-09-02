@@ -12,18 +12,25 @@ import {
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { DashboardCard, DashboardList, type ViewMode } from '@/app/(app)/dashboard/page';
-import { dashboards as allDashboards, dashboardGroups as allGroups } from '@/lib/mock-data';
+import { dashboards as allDashboards, dashboardGroups as allGroups, type Dashboard } from '@/lib/mock-data';
 import { Button } from '../ui/button';
 import { useSearchParams } from 'next/navigation';
 
 const DASHBOARDS_PREVIEW_LIMIT_GRID = 3;
 const DASHBOARDS_PREVIEW_LIMIT_LIST = 2;
 
+type DashboardActionsProps = {
+  onFavoriteToggle: (id: string) => void;
+  onDelete: (id: string) => void;
+  onLeave: (id: string) => void;
+};
 
 const GroupContent = ({
   dashboards,
+  actionProps,
 }: {
   dashboards: (typeof allDashboards);
+  actionProps: DashboardActionsProps;
 }) => {
   const [showAll, setShowAll] = useState(false);
   const searchParams = useSearchParams();
@@ -42,11 +49,11 @@ const GroupContent = ({
   return (
     <>
       {viewMode === 'list' ? (
-        <DashboardList dashboards={dashboardsToShow} />
+        <DashboardList dashboards={dashboardsToShow} {...actionProps} />
       ) : (
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {dashboardsToShow.map(dashboard => (
-            <DashboardCard key={dashboard.id} dashboard={dashboard} />
+            <DashboardCard key={dashboard.id} dashboard={dashboard} {...actionProps} />
           ))}
         </div>
       )}
@@ -66,9 +73,11 @@ const GroupContent = ({
 const GroupCard = ({
   group,
   dashboards,
+  actionProps,
 }: {
   group: (typeof allGroups)[0];
   dashboards: (typeof allDashboards);
+  actionProps: DashboardActionsProps;
 }) => {
   return (
     <AccordionItem value={group.id} className="border-0">
@@ -76,7 +85,7 @@ const GroupCard = ({
           <h2 className="text-xl font-bold font-headline">{group.name}</h2>
       </AccordionTrigger>
       <AccordionContent className="pt-6">
-          <GroupContent dashboards={dashboards} />
+          <GroupContent dashboards={dashboards} actionProps={actionProps} />
       </AccordionContent>
     </AccordionItem>
   );
@@ -85,9 +94,11 @@ const GroupCard = ({
 export default function DashboardGroupsView({
   dashboards,
   groups,
+  actionProps
 }: {
-  dashboards: (typeof allDashboards);
+  dashboards: Dashboard[];
   groups: (typeof allGroups);
+  actionProps: DashboardActionsProps;
 }) {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -139,6 +150,7 @@ export default function DashboardGroupsView({
               key={group.id}
               group={group}
               dashboards={group.dashboards}
+              actionProps={actionProps}
             />
           ))}
         </Accordion>

@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -11,10 +10,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Search, Star, User, Box } from 'lucide-react';
+import { Users, Search, Star, User, Box, MoreVertical, Trash2, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { dashboards as allDashboards } from '@/lib/mock-data';
+import { dashboards as allDashboards, type Dashboard } from '@/lib/mock-data';
 import {
   Table,
   TableBody,
@@ -23,11 +22,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { PaginationControls } from '@/components/dashboard/pagination-controls';
 import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
 import DashboardSectionCard from '@/components/dashboard/dashboard-section-card';
 import { useSearchParams } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 const getRoleStyles = (role: string) => {
   switch (role) {
@@ -40,25 +48,99 @@ const getRoleStyles = (role: string) => {
   }
 };
 
-export const DashboardCard = ({ dashboard }: { dashboard: (typeof allDashboards)[0] }) => {
+type DashboardActionsProps = {
+  dashboard: Dashboard;
+  onFavoriteToggle: (id: string) => void;
+  onDelete: (id: string) => void;
+  onLeave: (id: string) => void;
+};
+
+const DashboardActions = ({ dashboard, onFavoriteToggle, onDelete, onLeave }: DashboardActionsProps) => {
+  const { toast } = useToast();
+
+  const handleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onFavoriteToggle(dashboard.id);
+    toast({
+      title: dashboard.isFavorite ? "Removed from Favorites" : "Added to Favorites",
+      description: `"${dashboard.name}" has been updated.`,
+    });
+  }
+
+  const handleDelete = () => {
+    onDelete(dashboard.id);
+    toast({
+      title: "Dashboard Deleted",
+      description: `"${dashboard.name}" has been permanently deleted.`,
+      variant: "destructive"
+    });
+  }
+
+  const handleLeave = () => {
+    onLeave(dashboard.id);
+    toast({
+      title: "Left Dashboard",
+      description: `You have left "${dashboard.name}".`,
+    });
+  }
+
   return (
-    <Card>
+    <div className="flex items-center gap-1">
+      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleFavorite}>
+        <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
+        <span className="sr-only">Favorite</span>
+      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <MoreVertical className="h-4 w-4" />
+            <span className="sr-only">More actions</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem disabled={dashboard.role !== 'Owner'}>
+            <Users className="mr-2" /> Share
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          {dashboard.role === 'Owner' ? (
+            <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive">
+              <Trash2 className="mr-2" /> Delete
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem onClick={handleLeave}>
+              <LogOut className="mr-2" /> Leave
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  )
+};
+
+
+export const DashboardCard = ({ dashboard, ...actionProps }: { dashboard: Dashboard } & Omit<DashboardActionsProps, 'dashboard'>) => {
+  return (
+    <Card className="flex flex-col">
       <CardHeader>
         <div className="flex items-start justify-between">
-          <CardTitle className="font-headline text-xl truncate">
-            {dashboard.name}
+          <CardTitle className="font-headline text-xl truncate pr-2">
+            <Link href={`/dashboard/${dashboard.id}`} className="hover:underline">
+              {dashboard.name}
+            </Link>
           </CardTitle>
-          <div
-            className={`text-xs font-medium py-1 px-2 rounded-md border ${getRoleStyles(
-              dashboard.role
-            )}`}
-          >
-            {dashboard.role}
+          <div className="flex items-center gap-2">
+            <div
+              className={`text-xs font-medium py-1 px-2 rounded-md border ${getRoleStyles(
+                dashboard.role
+              )}`}
+            >
+              {dashboard.role}
+            </div>
           </div>
         </div>
-        <CardDescription className="truncate">{dashboard.description}</CardDescription>
+        <CardDescription className="truncate h-10">{dashboard.description}</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1">
         <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6">
                 <AvatarImage src={dashboard.owner.avatarUrl} alt={dashboard.owner.name} />
@@ -73,23 +155,21 @@ export const DashboardCard = ({ dashboard }: { dashboard: (typeof allDashboards)
         <Button asChild className="w-full">
           <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
         </Button>
-        <Button variant="outline" disabled={dashboard.role !== 'Owner'}>
-          <Users className="mr-2" /> Share
-        </Button>
+        <DashboardActions dashboard={dashboard} {...actionProps} />
       </CardFooter>
     </Card>
   );
 };
 
-const DashboardGrid = ({ dashboards }: { dashboards: (typeof allDashboards) }) => (
+const DashboardGrid = ({ dashboards, ...actionProps }: { dashboards: Dashboard[] } & Omit<DashboardActionsProps, 'dashboard'>) => (
   <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
     {dashboards.map(dashboard => (
-      <DashboardCard key={dashboard.id} dashboard={dashboard} />
+      <DashboardCard key={dashboard.id} dashboard={dashboard} {...actionProps} />
     ))}
   </div>
 );
 
-const DashboardListItem = ({ dashboard }: { dashboard: (typeof allDashboards)[0] }) => (
+const DashboardListItem = ({ dashboard, ...actionProps }: { dashboard: Dashboard } & Omit<DashboardActionsProps, 'dashboard'>) => (
   <TableRow>
     <TableCell>
       <div className="flex flex-col">
@@ -118,20 +198,18 @@ const DashboardListItem = ({ dashboard }: { dashboard: (typeof allDashboards)[0]
       </div>
     </TableCell>
     <TableCell className="text-right">
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-end items-center gap-2">
         <Button asChild variant="outline" size="sm">
           <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
         </Button>
-        <Button variant="ghost" size="sm" disabled={dashboard.role !== 'Owner'}>
-          <Users className="mr-2" /> Share
-        </Button>
+        <DashboardActions dashboard={dashboard} {...actionProps} />
       </div>
     </TableCell>
   </TableRow>
 );
 
 
-export const DashboardList = ({ dashboards }: { dashboards: (typeof allDashboards) }) => (
+export const DashboardList = ({ dashboards, ...actionProps }: { dashboards: Dashboard[] } & Omit<DashboardActionsProps, 'dashboard'>) => (
   <Card>
     <Table>
       <TableHeader>
@@ -144,7 +222,7 @@ export const DashboardList = ({ dashboards }: { dashboards: (typeof allDashboard
       </TableHeader>
       <TableBody>
         {dashboards.map(dashboard => (
-          <DashboardListItem key={dashboard.id} dashboard={dashboard} />
+          <DashboardListItem key={dashboard.id} dashboard={dashboard} {...actionProps} />
         ))}
       </TableBody>
     </Table>
@@ -153,18 +231,37 @@ export const DashboardList = ({ dashboards }: { dashboards: (typeof allDashboard
 
 export type ViewMode = 'grid' | 'list';
 
-export const DashboardView = ({ dashboards }: { dashboards: (typeof allDashboards) }) => {
+export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: Dashboard[] }) => {
   const searchParams = useSearchParams();
   const viewMode = (searchParams.get('view') as ViewMode) || 'grid';
   
-  const ITEMS_PER_PAGE = viewMode === 'list' ? 5 : 6;
+  const [dashboards, setDashboards] = useState(initialDashboards);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    setDashboards(initialDashboards);
+  }, [initialDashboards]);
+
+  const handleFavoriteToggle = (id: string) => {
+    setDashboards(dashboards.map(d => 
+      d.id === id ? { ...d, isFavorite: !d.isFavorite } : d
+    ));
+  };
+
+  const handleDelete = (id: string) => {
+    setDashboards(dashboards.filter(d => d.id !== id));
+  };
+
+  const handleLeave = (id: string) => {
+    setDashboards(dashboards.filter(d => d.id !== id));
+  };
 
   const filteredDashboards = dashboards.filter(d =>
     d.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const ITEMS_PER_PAGE = viewMode === 'list' ? 5 : 6;
   const totalPages = Math.ceil(filteredDashboards.length / ITEMS_PER_PAGE);
   const paginatedDashboards = filteredDashboards.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -181,13 +278,15 @@ export const DashboardView = ({ dashboards }: { dashboards: (typeof allDashboard
     setCurrentPage(1);
   }, [dashboards, viewMode, searchTerm]);
 
-  if (dashboards.length === 0) {
+  if (initialDashboards.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-12">
         No dashboards found for this category.
       </div>
     );
   }
+  
+  const actionProps = { onFavoriteToggle: handleFavoriteToggle, onDelete: handleDelete, onLeave: handleLeave };
 
   return (
     <div className="space-y-4">
@@ -208,9 +307,9 @@ export const DashboardView = ({ dashboards }: { dashboards: (typeof allDashboard
       ) : (
         <>
           {viewMode === 'list' ? (
-            <DashboardList dashboards={paginatedDashboards} />
+            <DashboardList dashboards={paginatedDashboards} {...actionProps} />
           ) : (
-            <DashboardGrid dashboards={paginatedDashboards} />
+            <DashboardGrid dashboards={paginatedDashboards} {...actionProps} />
           )}
           {totalPages > 1 && (
             <PaginationControls
@@ -249,3 +348,5 @@ export default function DashboardPage() {
     </div>
   )
 }
+
+    
