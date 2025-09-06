@@ -60,42 +60,40 @@ export default function QueryResults() {
             </TabsContent>
           </div>
 
-          <TabsContent value="data" className="flex-1 flex flex-col mt-4 min-h-0">
-            <ScrollArea className="flex-1 relative border rounded-md">
-                <Table>
-                    <TableHeader className="sticky top-0 bg-card z-10">
-                    <TableRow>
-                        <TableHead className="sticky left-0 bg-card w-[60px]">Row</TableHead>
-                        <TableHead>Order ID</TableHead>
-                        <TableHead>Customer</TableHead>
-                        <TableHead>Product</TableHead>
-                        <TableHead className="text-right">Quantity</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
-                        <TableHead>Country</TableHead>
+          <TabsContent value="data" className="flex-1 mt-4 min-h-0">
+            <ScrollArea className="w-full whitespace-nowrap rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Order ID</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Product</TableHead>
+                    <TableHead className="text-right">Quantity</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead>Country</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentOrders.map((order) => (
+                    <TableRow key={order.id}>
+                      <TableCell className="font-medium font-code">
+                        {order.id}
+                      </TableCell>
+                      <TableCell>{order.customer}</TableCell>
+                      <TableCell>{order.product}</TableCell>
+                      <TableCell className="text-right font-code">{order.quantity}</TableCell>
+                      <TableCell>
+                        {order.status}
+                      </TableCell>
+                      <TableCell className="text-right font-code">
+                        ${order.amount.toFixed(2)}
+                      </TableCell>
+                      <TableCell>{order.country}</TableCell>
                     </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                    {recentOrders.map((order, index) => (
-                        <TableRow key={order.id}>
-                        <TableCell className="sticky left-0 bg-card text-muted-foreground">{index + 1}</TableCell>
-                        <TableCell className="font-medium font-code">
-                            {order.id}
-                        </TableCell>
-                        <TableCell>{order.customer}</TableCell>
-                        <TableCell>{order.product}</TableCell>
-                        <TableCell className="text-right font-code">{order.quantity}</TableCell>
-                        <TableCell>
-                           {order.status}
-                        </TableCell>
-                        <TableCell className="text-right font-code">
-                            ${order.amount.toFixed(2)}
-                        </TableCell>
-                        <TableCell>{order.country}</TableCell>
-                        </TableRow>
-                    ))}
-                    </TableBody>
-                </Table>
+                  ))}
+                </TableBody>
+              </Table>
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
           </TabsContent>
