@@ -97,7 +97,7 @@ export default function QueryResults() {
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
           </TabsContent>
-          <TabsContent value="chart" className="h-[350px]">
+          <TabsContent value="chart" className="flex-1 min-h-0">
             <SampleBarChart />
           </TabsContent>
         </Tabs>
