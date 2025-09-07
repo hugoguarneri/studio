@@ -10,7 +10,7 @@ import { Input } from "../ui/input"
 
 export default function QueryEditor() {
     return (
-        <Card className="flex flex-col">
+        <Card className="flex flex-col h-full">
             <CardHeader className="p-4">
                 <Input 
                     defaultValue="New Query"
