@@ -37,7 +37,6 @@ import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
 
 const getRoleStyles = (role: string) => {
   switch (role) {
@@ -59,7 +58,7 @@ type DashboardActionsProps = {
   onCopyLink: (id: string) => void;
 };
 
-const DashboardActions = ({ dashboard, onDelete, onLeave, onCopyLink }: DashboardActionsProps) => {
+const DashboardActions = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onShare, onCopyLink }: DashboardActionsProps) => {
   const { toast } = useToast();
 
   const handleDelete = () => {
@@ -82,6 +81,20 @@ const DashboardActions = ({ dashboard, onDelete, onLeave, onCopyLink }: Dashboar
   const handleCopyLink = () => {
     onCopyLink(dashboard.id);
   };
+  
+  const handleShare = () => {
+    onShare(dashboard.id);
+  };
+
+  const handleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onFavoriteToggle(dashboard.id);
+    toast({
+      title: dashboard.isFavorite ? "Removed from Favorites" : "Added to Favorites",
+      description: `"${dashboard.name}" has been updated.`,
+    });
+  }
 
   return (
     <DropdownMenu>
@@ -92,6 +105,13 @@ const DashboardActions = ({ dashboard, onDelete, onLeave, onCopyLink }: Dashboar
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={handleFavorite}>
+          <Star className={cn("mr-2", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
+          {dashboard.isFavorite ? 'Unfavorite' : 'Favorite'}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleShare}>
+          <Share2 className="mr-2" /> Share
+        </DropdownMenuItem>
         <DropdownMenuItem disabled={dashboard.role !== 'Owner'}>
           <Pencil className="mr-2" /> Edit
         </DropdownMenuItem>
@@ -115,28 +135,11 @@ const DashboardActions = ({ dashboard, onDelete, onLeave, onCopyLink }: Dashboar
 
 
 export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onShare, onCopyLink }: DashboardActionsProps) => {
-  const { toast } = useToast();
   const group = dashboard.groupId ? dashboardGroups.find(g => g.id === dashboard.groupId) : null;
   
-  const handleFavorite = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onFavoriteToggle(dashboard.id);
-    toast({
-      title: dashboard.isFavorite ? "Removed from Favorites" : "Added to Favorites",
-      description: `"${dashboard.name}" has been updated.`,
-    });
-  }
-  
-  const handleShare = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onShare(dashboard.id);
-  };
-
   return (
     <Card className="flex flex-col relative">
-      <CardHeader className="flex-grow">
+      <CardHeader className="flex-grow pb-4">
         <div className="flex items-start justify-between">
           <CardTitle className="font-headline text-xl truncate pr-10">
             <Link href={`/dashboard/${dashboard.id}`} className="hover:underline">
@@ -180,14 +183,6 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
         <Button asChild className="flex-1" size="sm">
           <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
         </Button>
-        <Button variant="outline" size="icon" className="w-9 h-9" onClick={handleFavorite}>
-          <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
-          <span className="sr-only">Favorite</span>
-        </Button>
-        <Button variant="outline" size="icon" className="w-9 h-9" onClick={handleShare}>
-          <Share2 className="h-4 w-4" />
-          <span className="sr-only">Share</span>
-        </Button>
         <DashboardActions dashboard={dashboard} onFavoriteToggle={onFavoriteToggle} onDelete={onDelete} onLeave={onLeave} onShare={onShare} onCopyLink={() => onCopyLink(dashboard.id)} />
       </CardFooter>
     </Card>
@@ -195,79 +190,71 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
 };
 
 const DashboardGrid = ({ dashboards, ...actionProps }: { dashboards: Dashboard[] } & Omit<DashboardActionsProps, 'dashboard'>) => (
-  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
     {dashboards.map(dashboard => (
       <DashboardCard key={dashboard.id} dashboard={dashboard} {...actionProps} />
     ))}
   </div>
 );
 
-const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onShare, onCopyLink }: DashboardActionsProps) => {
-    const { toast } = useToast();
+const DashboardListItem = ({ dashboard, ...actionProps }: DashboardActionsProps) => {
     const group = dashboard.groupId ? dashboardGroups.find(g => g.id === dashboard.groupId) : null;
-    
-    const handleFavorite = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onFavoriteToggle(dashboard.id);
-        toast({
-          title: dashboard.isFavorite ? "Removed from Favorites" : "Added to Favorites",
-          description: `"${dashboard.name}" has been updated.`,
-        });
-    }
-
-    const handleShare = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onShare(dashboard.id);
-    };
     
     return (
       <TableRow>
-        <TableCell>
-            <div className="flex flex-col">
-                <Link href={`/dashboard/${dashboard.id}`} className="font-medium font-headline text-base hover:underline truncate">
-                {dashboard.name}
-                </Link>
-                <span className="text-sm text-muted-foreground truncate">{dashboard.description}</span>
+        <TableCell className='w-full'>
+            <div className="flex items-center gap-4">
+                <Button variant="outline" size="icon" className="hidden sm:inline-flex w-9 h-9 shrink-0" onClick={(e) => { e.stopPropagation(); actionProps.onFavoriteToggle(dashboard.id) }}>
+                    <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
+                    <span className="sr-only">Favorite</span>
+                </Button>
+                <div className="flex-grow">
+                    <div className="flex items-center gap-2">
+                        <Link href={`/dashboard/${dashboard.id}`} className="font-medium font-headline text-base hover:underline truncate">
+                            {dashboard.name}
+                        </Link>
+                        <div
+                            className={`text-xs font-medium py-1 px-2 rounded-md border hidden sm:block ${getRoleStyles(dashboard.role)}`}
+                        >
+                            {dashboard.role}
+                        </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground truncate">{dashboard.description}</p>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground sm:hidden mt-2">
+                        <div className="flex items-center gap-1.5">
+                            <Avatar className="h-4 w-4">
+                                <AvatarImage src={dashboard.owner.avatarUrl} alt={dashboard.owner.name} />
+                                <AvatarFallback>{dashboard.owner.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <span>{dashboard.owner.name}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <Calendar className="h-3 w-3" />
+                            <span>{new Date(dashboard.lastUpdated).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </TableCell>
         <TableCell className="hidden lg:table-cell">
             <span className="text-sm">{new Date(dashboard.lastUpdated).toLocaleDateString()}</span>
         </TableCell>
-        <TableCell className="hidden md:table-cell">
-        <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6">
-            <AvatarImage src={dashboard.owner.avatarUrl} alt={dashboard.owner.name} />
-            <AvatarFallback>{dashboard.owner.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <span className="text-sm text-muted-foreground">{dashboard.owner.name}</span>
-        </div>
-        </TableCell>
-        <TableCell className="hidden md:table-cell">
-        <div
-            className={`text-xs font-medium py-1 px-2 rounded-md border text-center w-fit ${getRoleStyles(
-            dashboard.role
-            )}`}
-        >
-            {dashboard.role}
-        </div>
+        <TableCell className="hidden sm:table-cell">
+            <div className="flex items-center gap-2">
+                <Avatar className="h-6 w-6">
+                    <AvatarImage src={dashboard.owner.avatarUrl} alt={dashboard.owner.name} />
+                    <AvatarFallback>{dashboard.owner.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <span className="text-sm text-muted-foreground">{dashboard.owner.name}</span>
+            </div>
         </TableCell>
         <TableCell className="text-right">
-        <div className="flex justify-end items-center gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
-            </Button>
-            <Button variant="outline" size="icon" className="w-9 h-9" onClick={handleFavorite}>
-                <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
-                <span className="sr-only">Favorite</span>
-            </Button>
-            <Button variant="outline" size="icon" className="w-9 h-9 hidden sm:flex" onClick={handleShare}>
-              <Share2 className="h-4 w-4" />
-              <span className="sr-only">Share</span>
-            </Button>
-            <DashboardActions dashboard={dashboard} onFavoriteToggle={onFavoriteToggle} onDelete={onDelete} onLeave={onLeave} onShare={onShare} onCopyLink={() => onCopyLink(dashboard.id)} />
-        </div>
+            <div className="flex justify-end items-center gap-2">
+                <Button asChild variant="outline" size="sm">
+                <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
+                </Button>
+                <DashboardActions dashboard={dashboard} {...actionProps} />
+            </div>
         </TableCell>
       </TableRow>
     );
@@ -281,8 +268,7 @@ export const DashboardList = ({ dashboards, ...actionProps }: { dashboards: Dash
         <TableRow>
           <TableHead>Name</TableHead>
           <TableHead className="hidden lg:table-cell">Last updated</TableHead>
-          <TableHead className="hidden md:table-cell">Owner</TableHead>
-          <TableHead className="hidden md:table-cell">Role</TableHead>
+          <TableHead className="hidden sm:table-cell">Owner</TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -319,6 +305,13 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
     setDashboards(dashboards.map(d => 
       d.id === id ? { ...d, isFavorite: !d.isFavorite } : d
     ));
+    const dashboard = dashboards.find(d => d.id === id);
+    if(dashboard){
+        toast({
+          title: dashboard.isFavorite ? "Removed from Favorites" : "Added to Favorites",
+          description: `"${dashboard.name}" has been updated.`,
+        });
+    }
   };
 
   const onDelete = (id: string) => {
@@ -374,7 +367,7 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
       });
   }, [dashboards, searchTerm, favoriteFilter, sortKey]);
 
-  const ITEMS_PER_PAGE = viewMode === 'list' ? 5 : 6;
+  const ITEMS_PER_PAGE = viewMode === 'list' ? 10 : 12;
   const totalPages = Math.ceil(sortedAndFilteredDashboards.length / ITEMS_PER_PAGE);
   const paginatedDashboards = sortedAndFilteredDashboards.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -411,11 +404,14 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        <div className="flex-grow" />
         <div className="flex items-center gap-4">
           <Select value={sortKey} onValueChange={(value) => setSortKey(value as SortKey)}>
-            <SelectTrigger className="w-auto md:w-[180px]">
-                <ArrowDownUp className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Sort by" />
+            <SelectTrigger className="w-full md:w-[180px]">
+                <div className="flex items-center gap-2">
+                    <ArrowDownUp className="h-4 w-4" />
+                    <span className="hidden md:inline">Sort by</span>
+                </div>
             </SelectTrigger>
             <SelectContent>
                 <SelectItem value="lastUpdated">Last Updated</SelectItem>
@@ -438,7 +434,7 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
                 onClick={() => setFavoriteFilter('favorites')}
             >
                 <Star className="h-4 w-4 text-amber-500" />
-                <span>Favorites</span>
+                <span className="hidden sm:inline">Favorites</span>
             </Button>
           </div>
         </div>
@@ -495,3 +491,5 @@ export default function DashboardPage() {
     </div>
   )
 }
+
+    
