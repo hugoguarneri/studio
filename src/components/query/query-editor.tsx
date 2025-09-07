@@ -35,16 +35,8 @@ export default function QueryEditor() {
                                 AI Assistant
                             </Button>
                         </SheetTrigger>
-                        <SheetContent>
-                            <SheetHeader>
-                                <SheetTitle>AI Query Assistant</SheetTitle>
-                                <SheetDescription>
-                                    Let AI help you generate or optimize your SQL queries.
-                                </SheetDescription>
-                            </SheetHeader>
-                            <div className="py-4">
-                                <AIAssistant />
-                            </div>
+                        <SheetContent className="w-full sm:max-w-2xl p-0">
+                            <AIAssistant />
                         </SheetContent>
                     </Sheet>
 

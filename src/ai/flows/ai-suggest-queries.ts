@@ -11,17 +11,21 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
+const MessageSchema = z.object({
+  role: z.enum(['user', 'assistant']),
+  content: z.string(),
+});
+
 const AISuggestQueriesInputSchema = z.object({
   databaseSchema: z
     .string()
+    .optional()
     .describe('The schema of the database, including table names and column names.'),
-  userPreferences: z
-    .string()
-    .describe('The user preferences for the types of queries they are interested in.'),
+  history: z.array(MessageSchema),
 });
 export type AISuggestQueriesInput = z.infer<typeof AISuggestQueriesInputSchema>;
 
-const AISuggestQueriesOutputSchema = z.array(z.string()).describe('A list of suggested SQL queries.');
+const AISuggestQueriesOutputSchema = z.string().describe('A markdown-formatted string with suggested SQL queries.');
 export type AISuggestQueriesOutput = z.infer<typeof AISuggestQueriesOutputSchema>;
 
 export async function suggestQueries(input: AISuggestQueriesInput): Promise<AISuggestQueriesOutput> {
@@ -31,18 +35,29 @@ export async function suggestQueries(input: AISuggestQueriesInput): Promise<AISu
 const prompt = ai.definePrompt({
   name: 'suggestQueriesPrompt',
   input: {schema: AISuggestQueriesInputSchema},
-  output: {schema: AISuggestQueriesOutputSchema},
+  output: {format: 'markdown'},
   prompt: `You are an AI assistant that suggests SQL queries based on a database schema and user preferences.
-
+  
+  {{#if databaseSchema}}
+  The user has provided the following database schema for context. Use this to inform your suggestions.
   Database Schema:
   {{{databaseSchema}}}
+  {{/if}}
 
-  User Preferences:
-  {{{userPreferences}}}
-
-  Suggest SQL queries that could reveal interesting insights from the data, considering the schema and preferences. Return the queries as a JSON array of strings.
+  The following is the chat history between you and the user.
+  {{#each history}}
+  {{#if (eq role 'user')}}
+  User: {{{content}}}
+  {{else}}
+  Assistant: {{{content}}}
+  {{/if}}
+  {{/each}}
+  
+  Based on the final user message, suggest SQL queries that could reveal interesting insights from the data.
+  If the user asks for something that is not a query, answer their question.
+  Your response should be formatted in Markdown, and SQL queries should be in a code block.
   Make sure the queries are compatible with PostgreSQL and MySQL.
-  Queries:
+  Assistant:
   `,
 });
 
