@@ -138,7 +138,7 @@ const schemaContent = [
 export default function DatabaseSchema() {
   return (
     <Card className="flex flex-col h-full">
-        <CardContent className="p-4 flex flex-col gap-4">
+        <CardContent className="p-4 flex flex-col gap-4 h-full">
             <Select>
                 <SelectTrigger id="connection">
                     <SelectValue placeholder="Select a database" />
@@ -158,7 +158,7 @@ export default function DatabaseSchema() {
                 </Button>
             </div>
             
-            <ScrollArea className="flex-1">
+            <ScrollArea className="flex-1 h-0">
                 <Accordion type="multiple" defaultValue={['tables']} className="pr-2">
                     <AccordionItem value="tables">
                         <AccordionTrigger className="text-sm font-semibold">
