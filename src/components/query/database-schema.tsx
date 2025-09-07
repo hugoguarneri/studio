@@ -93,7 +93,7 @@ const schemaContent = [
             { name: 'department_id', type: 'int', key: 'PK' },
             { name: 'department_name', type: 'varchar(100)' },
             { name: 'manager_id', type: 'int', key: 'FK' },
-        ] 
+        ]
     },
     { 
         name: 'customers', 
