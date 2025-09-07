@@ -35,7 +35,7 @@ export default function QueryEditor() {
                                 AI Assistant
                             </Button>
                         </SheetTrigger>
-                        <SheetContent className="w-full sm:max-w-2xl p-0">
+                        <SheetContent className="w-full sm:max-w-xl p-0">
                             <AIAssistant />
                         </SheetContent>
                     </Sheet>
