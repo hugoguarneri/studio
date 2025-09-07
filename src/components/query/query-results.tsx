@@ -61,7 +61,7 @@ export default function QueryResults() {
           </div>
 
           <TabsContent value="data" className="flex-1 mt-4 min-h-0">
-            <ScrollArea className="h-full w-full">
+            <ScrollArea className="w-full h-full">
               <Table>
                 <TableHeader>
                   <TableRow>
