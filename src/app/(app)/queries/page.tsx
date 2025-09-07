@@ -14,9 +14,13 @@ export default function QueriesPage() {
       </div>
 
       <div className="flex flex-col flex-1 gap-6 min-h-0">
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          <DatabaseSchema />
-          <QueryEditor />
+        <div className="flex flex-col lg:flex-row gap-6">
+            <div className="lg:w-1/3">
+                <DatabaseSchema />
+            </div>
+            <div className="lg:w-2/3">
+                <QueryEditor />
+            </div>
         </div>
         <div className="flex-1 min-h-0">
           <QueryResults />
