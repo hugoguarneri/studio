@@ -107,28 +107,28 @@ const DashboardActions = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onSh
         {isListItem && (
           <>
             <DropdownMenuItem onClick={handleFavorite}>
-              <Star className={cn("mr-2", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
+              <Star className={cn("mr-2 h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
               {dashboard.isFavorite ? 'Unfavorite' : 'Favorite'}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleShare}>
-              <Share2 className="mr-2" /> Share
+              <Share2 className="mr-2 h-4 w-4" /> Share
             </DropdownMenuItem>
           </>
         )}
         <DropdownMenuItem disabled={dashboard.role !== 'Owner'}>
-          <Pencil className="mr-2" /> Edit
+          <Pencil className="mr-2 h-4 w-4" /> Edit
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleCopyLink}>
-          <LinkIcon className="mr-2" /> Copy link
+          <LinkIcon className="mr-2 h-4 w-4" /> Copy link
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {dashboard.role === 'Owner' ? (
           <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive">
-            <Trash2 className="mr-2" /> Delete
+            <Trash2 className="mr-2 h-4 w-4" /> Delete
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem onClick={handleLeave}>
-            <LogOut className="mr-2" /> Leave
+            <LogOut className="mr-2 h-4 w-4" /> Leave
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>
@@ -217,7 +217,7 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
 };
 
 const DashboardGrid = ({ dashboards, ...actionProps }: { dashboards: Dashboard[] } & Omit<DashboardActionsProps, 'dashboard'>) => (
-  <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {dashboards.map(dashboard => (
       <DashboardCard key={dashboard.id} dashboard={dashboard} {...actionProps} />
     ))}
@@ -391,11 +391,16 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
 
   const sortedAndFilteredDashboards = useMemo(() => {
     return dashboards
-      .filter(d =>
-        d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        d.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        d.owner.name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      .filter(d => {
+        const group = d.groupId ? dashboardGroups.find(g => g.id === d.groupId) : null;
+        const searchTermLower = searchTerm.toLowerCase();
+        
+        return (
+          d.name.toLowerCase().includes(searchTermLower) ||
+          d.owner.name.toLowerCase().includes(searchTermLower) ||
+          (group && group.name.toLowerCase().includes(searchTermLower))
+        );
+      })
       .filter(d =>
         favoriteFilter === 'all' || (favoriteFilter === 'favorites' && d.isFavorite)
       )
@@ -441,7 +446,7 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
         <div className="relative flex-1 md:grow-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="Search by name, owner..." 
+            placeholder="Search by name, owner, group..." 
             className="pl-10 w-full md:w-64"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
