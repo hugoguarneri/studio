@@ -44,6 +44,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
         <div className="flex items-center gap-4">
             {(isDashboardSubPage && !isDashboardIdPage) && (
+              <>
                 <div className="flex items-center gap-2">
                     <Button
                         variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
@@ -66,11 +67,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         </Link>
                     </Button>
                 </div>
+                 <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    New Dashboard
+                </Button>
+              </>
             )}
-            <Button>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                New Dashboard
-            </Button>
         </div>
       </div>
       
