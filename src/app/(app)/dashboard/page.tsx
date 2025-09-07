@@ -38,6 +38,7 @@ import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const getRoleStyles = (role: string) => {
   switch (role) {
@@ -57,9 +58,10 @@ type DashboardActionsProps = {
   onLeave: (id: string) => void;
   onShare: (id: string) => void;
   onCopyLink: (id: string) => void;
+  isListItem?: boolean;
 };
 
-const DashboardActions = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onShare, onCopyLink }: DashboardActionsProps) => {
+const DashboardActions = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onShare, onCopyLink, isListItem = false }: DashboardActionsProps) => {
   const { toast } = useToast();
 
   const handleDelete = () => {
@@ -102,13 +104,17 @@ const DashboardActions = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onSh
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={handleFavorite}>
-          <Star className={cn("mr-2", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
-          {dashboard.isFavorite ? 'Unfavorite' : 'Favorite'}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleShare}>
-          <Share2 className="mr-2" /> Share
-        </DropdownMenuItem>
+        {isListItem && (
+          <>
+            <DropdownMenuItem onClick={handleFavorite}>
+              <Star className={cn("mr-2", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
+              {dashboard.isFavorite ? 'Unfavorite' : 'Favorite'}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleShare}>
+              <Share2 className="mr-2" /> Share
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuItem disabled={dashboard.role !== 'Owner'}>
           <Pencil className="mr-2" /> Edit
         </DropdownMenuItem>
@@ -180,6 +186,30 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
         <Button asChild className="flex-1" size="sm">
           <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
         </Button>
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button variant="outline" size="icon" className="w-9 h-9" onClick={() => onFavoriteToggle(dashboard.id)}>
+                        <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
+                        <span className="sr-only">Favorite</span>
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <p>{dashboard.isFavorite ? 'Unfavorite' : 'Favorite'}</p>
+                </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button variant="outline" size="icon" className="w-9 h-9" onClick={() => onShare(dashboard.id)}>
+                        <Share2 className="h-4 w-4" />
+                        <span className="sr-only">Share</span>
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <p>Share</p>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
         <DashboardActions dashboard={dashboard} onFavoriteToggle={onFavoriteToggle} onDelete={onDelete} onLeave={onLeave} onShare={onShare} onCopyLink={() => onCopyLink(dashboard.id)} />
       </CardFooter>
     </Card>
@@ -187,7 +217,7 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
 };
 
 const DashboardGrid = ({ dashboards, ...actionProps }: { dashboards: Dashboard[] } & Omit<DashboardActionsProps, 'dashboard'>) => (
-  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+  <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
     {dashboards.map(dashboard => (
       <DashboardCard key={dashboard.id} dashboard={dashboard} {...actionProps} />
     ))}
@@ -195,16 +225,10 @@ const DashboardGrid = ({ dashboards, ...actionProps }: { dashboards: Dashboard[]
 );
 
 const DashboardListItem = ({ dashboard, ...actionProps }: DashboardActionsProps) => {
-    const group = dashboard.groupId ? dashboardGroups.find(g => g.id === dashboard.groupId) : null;
-    
     return (
       <TableRow>
         <TableCell className='w-full'>
             <div className="flex items-start sm:items-center gap-4">
-                <Button variant="outline" size="icon" className="hidden sm:inline-flex w-9 h-9 shrink-0" onClick={(e) => { e.stopPropagation(); actionProps.onFavoriteToggle(dashboard.id); }}>
-                    <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
-                    <span className="sr-only">Favorite</span>
-                </Button>
                 <div className="flex-grow">
                     <div className="flex items-center gap-2">
                         <Link href={`/dashboard/${dashboard.id}`} className="font-medium font-headline text-base hover:underline truncate">
@@ -218,7 +242,7 @@ const DashboardListItem = ({ dashboard, ...actionProps }: DashboardActionsProps)
                     </div>
                     <p className="text-sm text-muted-foreground truncate hidden sm:block">{dashboard.description}</p>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground sm:hidden mt-2">
-                        <div className="flex items-center gap-1.5">
+                         <div className="flex items-center gap-1.5">
                             <Avatar className="h-4 w-4">
                                 <AvatarImage src={dashboard.owner.avatarUrl} alt={dashboard.owner.name} />
                                 <AvatarFallback>{dashboard.owner.name.charAt(0)}</AvatarFallback>
@@ -247,10 +271,31 @@ const DashboardListItem = ({ dashboard, ...actionProps }: DashboardActionsProps)
         </TableCell>
         <TableCell className="text-right">
             <div className="flex justify-end items-center gap-2">
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" className="w-8 h-8 hidden xs:flex" onClick={() => actionProps.onFavoriteToggle(dashboard.id)}>
+                                <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
+                                <span className="sr-only">Favorite</span>
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent><p>{dashboard.isFavorite ? 'Unfavorite' : 'Favorite'}</p></TooltipContent>
+                    </Tooltip>
+                     <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" className="w-8 h-8 hidden sm:flex" onClick={() => actionProps.onShare(dashboard.id)}>
+                                <Share2 className="h-4 w-4" />
+                                <span className="sr-only">Share</span>
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent><p>Share</p></TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+
                 <Button asChild variant="outline" size="sm" className="hidden xs:inline-flex">
                   <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
                 </Button>
-                <DashboardActions dashboard={dashboard} {...actionProps} />
+                <DashboardActions dashboard={dashboard} {...actionProps} isListItem={true} />
             </div>
         </TableCell>
       </TableRow>
@@ -365,7 +410,7 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
       });
   }, [dashboards, searchTerm, favoriteFilter, sortKey]);
 
-  const ITEMS_PER_PAGE = viewMode === 'list' ? 10 : 12;
+  const ITEMS_PER_PAGE = viewMode === 'list' ? 10 : 9;
   const totalPages = Math.ceil(sortedAndFilteredDashboards.length / ITEMS_PER_PAGE);
   const paginatedDashboards = sortedAndFilteredDashboards.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
