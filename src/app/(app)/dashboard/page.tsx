@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -90,10 +91,6 @@ const DashboardActions = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onSh
     e.preventDefault();
     e.stopPropagation();
     onFavoriteToggle(dashboard.id);
-    toast({
-      title: dashboard.isFavorite ? "Removed from Favorites" : "Added to Favorites",
-      description: `"${dashboard.name}" has been updated.`,
-    });
   }
 
   return (
@@ -154,7 +151,7 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
             {dashboard.role}
           </div>
         </div>
-        <CardDescription className="truncate">{dashboard.description}</CardDescription>
+        <CardDescription className="line-clamp-2">{dashboard.description}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex items-center gap-2">
@@ -190,7 +187,7 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
 };
 
 const DashboardGrid = ({ dashboards, ...actionProps }: { dashboards: Dashboard[] } & Omit<DashboardActionsProps, 'dashboard'>) => (
-  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {dashboards.map(dashboard => (
       <DashboardCard key={dashboard.id} dashboard={dashboard} {...actionProps} />
     ))}
@@ -203,8 +200,8 @@ const DashboardListItem = ({ dashboard, ...actionProps }: DashboardActionsProps)
     return (
       <TableRow>
         <TableCell className='w-full'>
-            <div className="flex items-center gap-4">
-                <Button variant="outline" size="icon" className="hidden sm:inline-flex w-9 h-9 shrink-0" onClick={(e) => { e.stopPropagation(); actionProps.onFavoriteToggle(dashboard.id) }}>
+            <div className="flex items-start sm:items-center gap-4">
+                <Button variant="outline" size="icon" className="hidden sm:inline-flex w-9 h-9 shrink-0" onClick={(e) => { e.stopPropagation(); actionProps.onFavoriteToggle(dashboard.id); }}>
                     <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
                     <span className="sr-only">Favorite</span>
                 </Button>
@@ -214,12 +211,12 @@ const DashboardListItem = ({ dashboard, ...actionProps }: DashboardActionsProps)
                             {dashboard.name}
                         </Link>
                         <div
-                            className={`text-xs font-medium py-1 px-2 rounded-md border hidden sm:block ${getRoleStyles(dashboard.role)}`}
+                            className={`text-xs font-medium py-1 px-2 rounded-md border hidden md:block ${getRoleStyles(dashboard.role)}`}
                         >
                             {dashboard.role}
                         </div>
                     </div>
-                    <p className="text-sm text-muted-foreground truncate">{dashboard.description}</p>
+                    <p className="text-sm text-muted-foreground truncate hidden sm:block">{dashboard.description}</p>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground sm:hidden mt-2">
                         <div className="flex items-center gap-1.5">
                             <Avatar className="h-4 w-4">
@@ -250,8 +247,8 @@ const DashboardListItem = ({ dashboard, ...actionProps }: DashboardActionsProps)
         </TableCell>
         <TableCell className="text-right">
             <div className="flex justify-end items-center gap-2">
-                <Button asChild variant="outline" size="sm">
-                <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
+                <Button asChild variant="outline" size="sm" className="hidden xs:inline-flex">
+                  <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
                 </Button>
                 <DashboardActions dashboard={dashboard} {...actionProps} />
             </div>
@@ -351,6 +348,7 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
     return dashboards
       .filter(d =>
         d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        d.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         d.owner.name.toLowerCase().includes(searchTerm.toLowerCase())
       )
       .filter(d =>
@@ -398,7 +396,7 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
         <div className="relative flex-1 md:grow-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="Search by name or owner..." 
+            placeholder="Search by name, owner..." 
             className="pl-10 w-full md:w-64"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
