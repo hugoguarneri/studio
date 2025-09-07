@@ -52,7 +52,7 @@ export default function QueryResults() {
               </TabsTrigger>
               <TabsTrigger value="chart">
                 <BarChart className="mr-2 h-4 w-4" />
-                Chart
+                Visualizations
               </TabsTrigger>
             </TabsList>
             <TabsContent value="chart" className="mt-0">
