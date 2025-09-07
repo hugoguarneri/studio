@@ -159,7 +159,7 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
         </div>
         <CardDescription className="line-clamp-2 min-h-[40px]">{dashboard.description}</CardDescription>
       </CardHeader>
-      <CardContent className="p-4 pt-2 space-y-3">
+      <CardContent className="p-4 pt-2 space-y-2">
         <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6">
                 <AvatarImage src={dashboard.owner.avatarUrl} alt={dashboard.owner.name} />
@@ -169,7 +169,7 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
               Owned by {dashboard.owner.name}
             </span>
         </div>
-        <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
             <div className="flex items-center gap-1.5">
                 <Calendar className="h-3 w-3" />
                 <span>Updated {new Date(dashboard.lastUpdated).toLocaleDateString()}</span>
@@ -182,7 +182,7 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
             )}
         </div>
       </CardContent>
-      <CardFooter className="gap-2 p-4 pt-2 mt-auto">
+      <CardFooter className="gap-2 p-4 pt-0 mt-auto">
         <Button asChild className="flex-1" size="sm">
           <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
         </Button>
