@@ -159,7 +159,7 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
         </div>
         <CardDescription className="line-clamp-2">{dashboard.description}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="flex-1 min-h-0 space-y-3">
         <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6">
                 <AvatarImage src={dashboard.owner.avatarUrl} alt={dashboard.owner.name} />
@@ -217,7 +217,7 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
 };
 
 const DashboardGrid = ({ dashboards, ...actionProps }: { dashboards: Dashboard[] } & Omit<DashboardActionsProps, 'dashboard'>) => (
-  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+  <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
     {dashboards.map(dashboard => (
       <DashboardCard key={dashboard.id} dashboard={dashboard} {...actionProps} />
     ))}
@@ -225,80 +225,67 @@ const DashboardGrid = ({ dashboards, ...actionProps }: { dashboards: Dashboard[]
 );
 
 const DashboardListItem = ({ dashboard, ...actionProps }: DashboardActionsProps) => {
+    const group = dashboard.groupId ? dashboardGroups.find(g => g.id === dashboard.groupId) : null;
     return (
-      <TableRow>
-        <TableCell className='w-full'>
-            <div className="flex items-start sm:items-center gap-4">
-                <div className="flex-grow">
-                    <div className="flex items-center gap-2">
-                        <Link href={`/dashboard/${dashboard.id}`} className="font-medium font-headline text-base hover:underline truncate">
+        <TableRow>
+            <TableCell>
+                <div className="flex justify-between items-center w-full gap-4">
+                    <div className="flex-1 min-w-0">
+                        <Link href={`/dashboard/${dashboard.id}`} className="font-medium font-headline text-base hover:underline truncate block">
                             {dashboard.name}
                         </Link>
-                        <div
-                            className={`text-xs font-medium py-1 px-2 rounded-md border hidden md:block ${getRoleStyles(dashboard.role)}`}
-                        >
-                            {dashboard.role}
+                        <p className="text-sm text-muted-foreground truncate mt-0.5">{dashboard.description}</p>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground mt-2">
+                            <div className="flex items-center gap-1.5">
+                                <Avatar className="h-4 w-4">
+                                    <AvatarImage src={dashboard.owner.avatarUrl} alt={dashboard.owner.name} />
+                                    <AvatarFallback>{dashboard.owner.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <span>{dashboard.owner.name}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <Calendar className="h-3 w-3" />
+                                <span>Updated {new Date(dashboard.lastUpdated).toLocaleDateString()}</span>
+                            </div>
+                            {group && (
+                                <div className="flex items-center gap-1.5">
+                                    <Folder className="h-3 w-3" />
+                                    <span>{group.name}</span>
+                                </div>
+                            )}
                         </div>
                     </div>
-                    <p className="text-sm text-muted-foreground truncate hidden sm:block">{dashboard.description}</p>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground sm:hidden mt-2">
-                         <div className="flex items-center gap-1.5">
-                            <Avatar className="h-4 w-4">
-                                <AvatarImage src={dashboard.owner.avatarUrl} alt={dashboard.owner.name} />
-                                <AvatarFallback>{dashboard.owner.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <span>{dashboard.owner.name}</span>
+                    <div className="flex items-center gap-4 shrink-0">
+                        <div className={`text-xs font-medium py-1 px-2 rounded-md border hidden sm:block ${getRoleStyles(dashboard.role)}`}>
+                            {dashboard.role}
                         </div>
-                        <div className="flex items-center gap-1.5">
-                            <Calendar className="h-3 w-3" />
-                            <span>{new Date(dashboard.lastUpdated).toLocaleDateString()}</span>
+                        <div className="flex items-center gap-1">
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="w-8 h-8" onClick={() => actionProps.onFavoriteToggle(dashboard.id)}>
+                                            <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
+                                            <span className="sr-only">Favorite</span>
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent><p>{dashboard.isFavorite ? 'Unfavorite' : 'Favorite'}</p></TooltipContent>
+                                </Tooltip>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="w-8 h-8" onClick={() => actionProps.onShare(dashboard.id)}>
+                                            <Share2 className="h-4 w-4" />
+                                            <span className="sr-only">Share</span>
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent><p>Share</p></TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                            <DashboardActions dashboard={dashboard} {...actionProps} isListItem={true} />
                         </div>
                     </div>
                 </div>
-            </div>
-        </TableCell>
-        <TableCell className="hidden lg:table-cell">
-            <span className="text-sm">{new Date(dashboard.lastUpdated).toLocaleDateString()}</span>
-        </TableCell>
-        <TableCell className="hidden sm:table-cell">
-            <div className="flex items-center gap-2">
-                <Avatar className="h-6 w-6">
-                    <AvatarImage src={dashboard.owner.avatarUrl} alt={dashboard.owner.name} />
-                    <AvatarFallback>{dashboard.owner.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <span className="text-sm text-muted-foreground">{dashboard.owner.name}</span>
-            </div>
-        </TableCell>
-        <TableCell className="text-right">
-            <div className="flex justify-end items-center gap-2">
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" className="w-8 h-8 hidden xs:flex" onClick={() => actionProps.onFavoriteToggle(dashboard.id)}>
-                                <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
-                                <span className="sr-only">Favorite</span>
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent><p>{dashboard.isFavorite ? 'Unfavorite' : 'Favorite'}</p></TooltipContent>
-                    </Tooltip>
-                     <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" className="w-8 h-8 hidden sm:flex" onClick={() => actionProps.onShare(dashboard.id)}>
-                                <Share2 className="h-4 w-4" />
-                                <span className="sr-only">Share</span>
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent><p>Share</p></TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
-
-                <Button asChild variant="outline" size="sm" className="hidden xs:inline-flex">
-                  <Link href={`/dashboard/${dashboard.id}`}>Open</Link>
-                </Button>
-                <DashboardActions dashboard={dashboard} {...actionProps} isListItem={true} />
-            </div>
-        </TableCell>
-      </TableRow>
+            </TableCell>
+        </TableRow>
     );
 };
 
@@ -308,10 +295,7 @@ export const DashboardList = ({ dashboards, ...actionProps }: { dashboards: Dash
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead className="hidden lg:table-cell">Last updated</TableHead>
-          <TableHead className="hidden sm:table-cell">Owner</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          <TableHead>Dashboard Details</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -446,7 +430,7 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
         <div className="relative flex-1 md:grow-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="Search by name, owner, group..." 
+            placeholder="Search by name, owner, or group..." 
             className="pl-10 w-full md:w-64"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
