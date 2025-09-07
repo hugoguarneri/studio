@@ -38,7 +38,6 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 
 const getRoleStyles = (role: string) => {
   switch (role) {
@@ -137,7 +136,7 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
 
   return (
     <Card className="flex flex-col relative">
-      <CardHeader>
+      <CardHeader className="flex-grow">
         <div className="flex items-start justify-between">
           <CardTitle className="font-headline text-xl truncate pr-10">
             <Link href={`/dashboard/${dashboard.id}`} className="hover:underline">
@@ -152,9 +151,9 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
             {dashboard.role}
           </div>
         </div>
-        <CardDescription className="truncate h-10">{dashboard.description}</CardDescription>
+        <CardDescription className="truncate">{dashboard.description}</CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 space-y-3">
+      <CardContent className="space-y-3">
         <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6">
                 <AvatarImage src={dashboard.owner.avatarUrl} alt={dashboard.owner.name} />
@@ -196,7 +195,7 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
 };
 
 const DashboardGrid = ({ dashboards, ...actionProps }: { dashboards: Dashboard[] } & Omit<DashboardActionsProps, 'dashboard'>) => (
-  <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {dashboards.map(dashboard => (
       <DashboardCard key={dashboard.id} dashboard={dashboard} {...actionProps} />
     ))}
@@ -299,6 +298,7 @@ export const DashboardList = ({ dashboards, ...actionProps }: { dashboards: Dash
 export type ViewMode = 'grid' | 'list';
 
 type SortKey = 'name' | 'lastUpdated';
+type FavoriteFilter = 'all' | 'favorites';
 
 export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: Dashboard[] }) => {
   const searchParams = useSearchParams();
@@ -308,7 +308,7 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('lastUpdated');
-  const [showFavorites, setShowFavorites] = useState(false);
+  const [favoriteFilter, setFavoriteFilter] = useState<FavoriteFilter>('all');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -357,10 +357,11 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
   const sortedAndFilteredDashboards = useMemo(() => {
     return dashboards
       .filter(d =>
-        d.name.toLowerCase().includes(searchTerm.toLowerCase())
+        d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        d.owner.name.toLowerCase().includes(searchTerm.toLowerCase())
       )
       .filter(d =>
-        !showFavorites || d.isFavorite
+        favoriteFilter === 'all' || (favoriteFilter === 'favorites' && d.isFavorite)
       )
       .sort((a, b) => {
         if (sortKey === 'name') {
@@ -371,7 +372,7 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
         }
         return 0;
       });
-  }, [dashboards, searchTerm, showFavorites, sortKey]);
+  }, [dashboards, searchTerm, favoriteFilter, sortKey]);
 
   const ITEMS_PER_PAGE = viewMode === 'list' ? 5 : 6;
   const totalPages = Math.ceil(sortedAndFilteredDashboards.length / ITEMS_PER_PAGE);
@@ -388,7 +389,7 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [dashboards, viewMode, searchTerm, showFavorites, sortKey]);
+  }, [dashboards, viewMode, searchTerm, favoriteFilter, sortKey]);
 
   if (initialDashboards.length === 0) {
     return (
@@ -404,7 +405,7 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
         <div className="relative flex-1 md:grow-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="Search dashboards..." 
+            placeholder="Search by name or owner..." 
             className="pl-10 w-full md:w-64"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -412,7 +413,7 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
         </div>
         <div className="flex items-center gap-4">
           <Select value={sortKey} onValueChange={(value) => setSortKey(value as SortKey)}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-auto md:w-[180px]">
                 <ArrowDownUp className="mr-2 h-4 w-4" />
                 <SelectValue placeholder="Sort by" />
             </SelectTrigger>
@@ -421,12 +422,24 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
                 <SelectItem value="name">Name</SelectItem>
             </SelectContent>
           </Select>
-          <div className="flex items-center space-x-2">
-            <Switch id="favorites-only" checked={showFavorites} onCheckedChange={setShowFavorites} />
-            <Label htmlFor="favorites-only" className="flex items-center gap-2">
+          <div className="flex items-center p-1 bg-muted rounded-md">
+            <Button 
+                variant={favoriteFilter === 'all' ? 'secondary' : 'ghost'} 
+                size="sm" 
+                className="px-3"
+                onClick={() => setFavoriteFilter('all')}
+            >
+                All
+            </Button>
+            <Button 
+                variant={favoriteFilter === 'favorites' ? 'secondary' : 'ghost'} 
+                size="sm"
+                className="flex items-center gap-2 px-3"
+                onClick={() => setFavoriteFilter('favorites')}
+            >
                 <Star className="h-4 w-4 text-amber-500" />
-                <span>Favorites Only</span>
-            </Label>
+                <span>Favorites</span>
+            </Button>
           </div>
         </div>
       </div>
@@ -482,5 +495,3 @@ export default function DashboardPage() {
     </div>
   )
 }
-
-    
