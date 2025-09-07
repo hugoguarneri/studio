@@ -10,10 +10,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Search, User, Box, MoreVertical, Trash2, LogOut, Pencil, Link as LinkIcon, Star, Share2 } from 'lucide-react';
+import { Users, Search, User, Box, MoreVertical, Trash2, LogOut, Pencil, Link as LinkIcon, Star, Share2, Calendar, Folder, ArrowDownUp } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { dashboards as allDashboards, type Dashboard } from '@/lib/mock-data';
+import { dashboards as allDashboards, type Dashboard, dashboardGroups } from '@/lib/mock-data';
 import {
   Table,
   TableBody,
@@ -31,11 +31,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { PaginationControls } from '@/components/dashboard/pagination-controls';
 import { Input } from '@/components/ui/input';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import DashboardSectionCard from '@/components/dashboard/dashboard-section-card';
 import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 
 const getRoleStyles = (role: string) => {
   switch (role) {
@@ -114,6 +117,7 @@ const DashboardActions = ({ dashboard, onDelete, onLeave, onCopyLink }: Dashboar
 
 export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onShare, onCopyLink }: DashboardActionsProps) => {
   const { toast } = useToast();
+  const group = dashboard.groupId ? dashboardGroups.find(g => g.id === dashboard.groupId) : null;
   
   const handleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -150,7 +154,7 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
         </div>
         <CardDescription className="truncate h-10">{dashboard.description}</CardDescription>
       </CardHeader>
-      <CardContent className="flex-1">
+      <CardContent className="flex-1 space-y-3">
         <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6">
                 <AvatarImage src={dashboard.owner.avatarUrl} alt={dashboard.owner.name} />
@@ -159,6 +163,18 @@ export const DashboardCard = ({ dashboard, onFavoriteToggle, onDelete, onLeave, 
             <span className="text-sm text-muted-foreground">
               Owned by {dashboard.owner.name}
             </span>
+        </div>
+        <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+                <Calendar className="h-3 w-3" />
+                <span>Updated {new Date(dashboard.lastUpdated).toLocaleDateString()}</span>
+            </div>
+            {group && (
+                <div className="flex items-center gap-1.5">
+                    <Folder className="h-3 w-3" />
+                    <span>{group.name}</span>
+                </div>
+            )}
         </div>
       </CardContent>
       <CardFooter className="gap-2">
@@ -189,6 +205,7 @@ const DashboardGrid = ({ dashboards, ...actionProps }: { dashboards: Dashboard[]
 
 const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onShare, onCopyLink }: DashboardActionsProps) => {
     const { toast } = useToast();
+    const group = dashboard.groupId ? dashboardGroups.find(g => g.id === dashboard.groupId) : null;
     
     const handleFavorite = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -216,7 +233,10 @@ const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onS
                 <span className="text-sm text-muted-foreground truncate">{dashboard.description}</span>
             </div>
         </TableCell>
-        <TableCell>
+        <TableCell className="hidden lg:table-cell">
+            <span className="text-sm">{new Date(dashboard.lastUpdated).toLocaleDateString()}</span>
+        </TableCell>
+        <TableCell className="hidden md:table-cell">
         <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6">
             <AvatarImage src={dashboard.owner.avatarUrl} alt={dashboard.owner.name} />
@@ -225,7 +245,7 @@ const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onS
             <span className="text-sm text-muted-foreground">{dashboard.owner.name}</span>
         </div>
         </TableCell>
-        <TableCell>
+        <TableCell className="hidden md:table-cell">
         <div
             className={`text-xs font-medium py-1 px-2 rounded-md border text-center w-fit ${getRoleStyles(
             dashboard.role
@@ -243,7 +263,7 @@ const DashboardListItem = ({ dashboard, onFavoriteToggle, onDelete, onLeave, onS
                 <Star className={cn("h-4 w-4", dashboard.isFavorite && "fill-amber-400 text-amber-500")} />
                 <span className="sr-only">Favorite</span>
             </Button>
-            <Button variant="outline" size="icon" className="w-9 h-9" onClick={handleShare}>
+            <Button variant="outline" size="icon" className="w-9 h-9 hidden sm:flex" onClick={handleShare}>
               <Share2 className="h-4 w-4" />
               <span className="sr-only">Share</span>
             </Button>
@@ -261,8 +281,9 @@ export const DashboardList = ({ dashboards, ...actionProps }: { dashboards: Dash
       <TableHeader>
         <TableRow>
           <TableHead>Name</TableHead>
-          <TableHead>Owner</TableHead>
-          <TableHead>Role</TableHead>
+          <TableHead className="hidden lg:table-cell">Last updated</TableHead>
+          <TableHead className="hidden md:table-cell">Owner</TableHead>
+          <TableHead className="hidden md:table-cell">Role</TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -277,6 +298,8 @@ export const DashboardList = ({ dashboards, ...actionProps }: { dashboards: Dash
 
 export type ViewMode = 'grid' | 'list';
 
+type SortKey = 'name' | 'lastUpdated';
+
 export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: Dashboard[] }) => {
   const searchParams = useSearchParams();
   const viewMode = (searchParams.get('view') as ViewMode) || 'grid';
@@ -284,6 +307,8 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
   const [dashboards, setDashboards] = useState(initialDashboards);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortKey, setSortKey] = useState<SortKey>('lastUpdated');
+  const [showFavorites, setShowFavorites] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -329,13 +354,28 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
     onCopyLink,
   };
 
-  const filteredDashboards = dashboards.filter(d =>
-    d.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const sortedAndFilteredDashboards = useMemo(() => {
+    return dashboards
+      .filter(d =>
+        d.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .filter(d =>
+        !showFavorites || d.isFavorite
+      )
+      .sort((a, b) => {
+        if (sortKey === 'name') {
+          return a.name.localeCompare(b.name);
+        }
+        if (sortKey === 'lastUpdated') {
+          return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime();
+        }
+        return 0;
+      });
+  }, [dashboards, searchTerm, showFavorites, sortKey]);
 
   const ITEMS_PER_PAGE = viewMode === 'list' ? 5 : 6;
-  const totalPages = Math.ceil(filteredDashboards.length / ITEMS_PER_PAGE);
-  const paginatedDashboards = filteredDashboards.slice(
+  const totalPages = Math.ceil(sortedAndFilteredDashboards.length / ITEMS_PER_PAGE);
+  const paginatedDashboards = sortedAndFilteredDashboards.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
@@ -348,7 +388,7 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [dashboards, viewMode, searchTerm]);
+  }, [dashboards, viewMode, searchTerm, showFavorites, sortKey]);
 
   if (initialDashboards.length === 0) {
     return (
@@ -360,19 +400,40 @@ export const DashboardView = ({ dashboards: initialDashboards }: { dashboards: D
   
   return (
     <div className="space-y-4">
-      <div className="relative w-full md:w-64">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input 
-          placeholder="Search in this section..." 
-          className="pl-10"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="relative flex-1 md:grow-0">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder="Search dashboards..." 
+            className="pl-10 w-full md:w-64"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="flex items-center gap-4">
+          <Select value={sortKey} onValueChange={(value) => setSortKey(value as SortKey)}>
+            <SelectTrigger className="w-[180px]">
+                <ArrowDownUp className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="lastUpdated">Last Updated</SelectItem>
+                <SelectItem value="name">Name</SelectItem>
+            </SelectContent>
+          </Select>
+          <div className="flex items-center space-x-2">
+            <Switch id="favorites-only" checked={showFavorites} onCheckedChange={setShowFavorites} />
+            <Label htmlFor="favorites-only" className="flex items-center gap-2">
+                <Star className="h-4 w-4 text-amber-500" />
+                <span>Favorites Only</span>
+            </Label>
+          </div>
+        </div>
       </div>
 
-      {filteredDashboards.length === 0 ? (
+      {sortedAndFilteredDashboards.length === 0 ? (
          <div className="text-center text-muted-foreground py-12">
-          No dashboards found matching your search.
+          No dashboards found matching your criteria.
         </div>
       ) : (
         <>
@@ -421,3 +482,5 @@ export default function DashboardPage() {
     </div>
   )
 }
+
+    

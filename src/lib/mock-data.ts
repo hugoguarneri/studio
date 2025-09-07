@@ -9,7 +9,7 @@ export type Dashboard = {
     avatarUrl: string;
   };
   isFavorite: boolean;
-  lastViewed: Date;
+  lastUpdated: Date;
   groupId: string | null;
 };
 
@@ -76,7 +76,7 @@ export const dashboards: Dashboard[] = [
     role: 'Owner',
     owner: { name: 'You', avatarUrl: 'https://picsum.photos/id/237/32/32' },
     isFavorite: true,
-    lastViewed: new Date('2024-07-30T10:00:00Z'),
+    lastUpdated: new Date('2024-07-30T10:00:00Z'),
     groupId: 'group_sales',
   },
   {
@@ -86,7 +86,7 @@ export const dashboards: Dashboard[] = [
     role: 'Editor',
     owner: { name: 'Marketing Team', avatarUrl: 'https://picsum.photos/id/1/32/32' },
     isFavorite: false,
-    lastViewed: new Date('2024-07-29T14:30:00Z'),
+    lastUpdated: new Date('2024-07-29T14:30:00Z'),
     groupId: 'group_marketing',
   },
   {
@@ -96,7 +96,7 @@ export const dashboards: Dashboard[] = [
     role: 'Viewer',
     owner: { name: 'Alex Doe', avatarUrl: 'https://picsum.photos/id/1005/32/32' },
     isFavorite: true,
-    lastViewed: new Date('2024-07-30T11:00:00Z'),
+    lastUpdated: new Date('2024-07-25T11:00:00Z'),
     groupId: 'group_general',
   },
   {
@@ -106,7 +106,7 @@ export const dashboards: Dashboard[] = [
     role: 'Owner',
     owner: { name: 'You', avatarUrl: 'https://picsum.photos/id/237/32/32' },
     isFavorite: false,
-    lastViewed: new Date('2024-07-28T09:00:00Z'),
+    lastUpdated: new Date('2024-06-15T09:00:00Z'),
     groupId: null,
   },
 ];
@@ -125,3 +125,5 @@ export const dashboardGroups = [
     name: 'General Company',
   },
 ];
+
+    
