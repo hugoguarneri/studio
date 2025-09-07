@@ -26,10 +26,10 @@ const initialWidgets: WidgetData[] = [
 ]
 
 const initialLayouts: Layout[] = [
-    { i: '1', x: 0, y: 0, w: 6, h: 2 },
-    { i: '2', x: 6, y: 0, w: 3, h: 2 },
-    { i: '3', x: 9, y: 0, w: 3, h: 2 },
-    { i: '4', x: 0, y: 2, w: 12, h: 2 },
+    { i: '1', x: 0, y: 0, w: 6, h: 2, minW: 4, minH: 2 },
+    { i: '2', x: 6, y: 0, w: 3, h: 2, minW: 3, minH: 2 },
+    { i: '3', x: 9, y: 0, w: 3, h: 2, minW: 3, minH: 2 },
+    { i: '4', x: 0, y: 2, w: 12, h: 2, minW: 6, minH: 2 },
 ];
 
 
