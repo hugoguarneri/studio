@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import './grid-layout.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 
