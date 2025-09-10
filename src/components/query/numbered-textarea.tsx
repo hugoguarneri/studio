@@ -19,17 +19,17 @@ const NumberedTextarea = forwardRef((props, ref) => {
     formatQuery: () => {
       let formatted = value.replace(/\s+/g, ' ').trim();
       
-      const keywords = ['SELECT', 'FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT', 'JOIN', 'ON', 'INSERT', 'UPDATE', 'DELETE', 'AND', 'OR'];
+      const keywords = ['FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT', 'JOIN', 'ON', 'AND', 'OR', 'SELECT'];
       keywords.forEach(keyword => {
-        const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-        if (keyword === 'AND' || keyword === 'OR') {
-          // Add extra indentation for AND/OR within WHERE
-          formatted = formatted.replace(regex, `\n  ${keyword.toUpperCase()}`);
-        } else {
+          const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
           formatted = formatted.replace(regex, `\n${keyword.toUpperCase()}`);
-        }
       });
-        
+      
+      // Handle parentheses
+      formatted = formatted.replace(/\(/g, ' ( ');
+      formatted = formatted.replace(/\)/g, ' ) ');
+      formatted = formatted.replace(/\s+/g, ' '); // Clean up extra spaces again
+
       let finalResult = '';
       let indentLevel = 0;
       const lines = formatted.split('\n');
@@ -49,38 +49,47 @@ const NumberedTextarea = forwardRef((props, ref) => {
             indentLevel++;
         }
       });
-
-
-      // Cleanup multiple newlines and trailing/leading spaces
-      finalResult = finalResult.replace(/\n\s*\n/g, '\n').trim();
       
-      // Handle parentheses specifically for block-like structure
+      finalResult = finalResult.replace(/\(\s*\n/g, '(\n');
+      finalResult = finalResult.replace(/\n\s*\)/g, '\n)');
+      
+      // Post-processing to fix common issues
       let resultWithParens = '';
       indentLevel = 0;
       finalResult.split('\n').forEach(line => {
           let trimmedLine = line.trim();
-          if (trimmedLine.endsWith(')')) {
+          if (trimmedLine.startsWith(')')) {
               indentLevel = Math.max(0, indentLevel - 1);
-              resultWithParens += '  '.repeat(indentLevel) + trimmedLine + '\n';
-          } else if (trimmedLine.endsWith('(')) {
-              resultWithParens += '  '.repeat(indentLevel) + trimmedLine + '\n';
-              indentLevel++;
+          }
+          
+          let lineToAdd = '  '.repeat(indentLevel) + trimmedLine;
+          
+          // Don't add newline for the very first line if it's SELECT
+          if (resultWithParens === '' && trimmedLine.startsWith('SELECT')) {
+            resultWithParens += lineToAdd;
           } else {
-              resultWithParens += '  '.repeat(indentLevel) + trimmedLine + '\n';
+            resultWithParens += '\n' + lineToAdd;
+          }
+
+          if (trimmedLine.endsWith('(')) {
+              indentLevel++;
           }
       });
       
-      // A final pass to fix common issues
+      // Final cleanup
       resultWithParens = resultWithParens
-        .replace(/\(\s*\n/g, '(\n')
-        .replace(/\n\s*\)/g, '\n)')
+        .replace(/\n\s*\n/g, '\n') // Remove double newlines
+        .replace(/ \(/g, ' (\n')
+        .replace(/\) /g, '\n) ')
         .replace(/\s+AND/g, '\n  AND')
         .replace(/\s+OR/g, '\n  OR')
-        .replace(/JOIN/g, '\nJOIN')
-        .replace(/WHERE/g, '\nWHERE')
-        .replace(/FROM/g, '\nFROM')
+        .replace(/\s*JOIN/g, '\nJOIN')
+        .replace(/\s*WHERE/g, '\nWHERE')
+        .replace(/\s*FROM/g, '\nFROM')
+        .replace(/\s*ON/g, '\n  ON')
+        .replace(/\s*SELECT/g, 'SELECT')
         .trim();
-
+        
       setValue(resultWithParens);
     }
   }));
