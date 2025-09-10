@@ -5,7 +5,7 @@ import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 're
 import { cn } from '@/lib/utils';
 
 const NumberedTextarea = forwardRef((props, ref) => {
-  const [value, setValue] = useState('SELECT * FROM users;');
+  const [value, setValue] = useState('SELECT * FROM users u JOIN orders o on u.id = o.user_id where u.id = 1 and (u.name = \'test\' or u.email = \'test@test.com\') and u.id > 100;');
   const [lineCount, setLineCount] = useState(1);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -17,23 +17,103 @@ const NumberedTextarea = forwardRef((props, ref) => {
 
   useImperativeHandle(ref, () => ({
     formatQuery: () => {
-      // Basic formatter: uppercase keywords and fix spacing.
-      // In a real app, you'd use a proper SQL formatting library.
-      const keywords = ['SELECT', 'FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT', 'JOIN', 'ON', 'INSERT', 'UPDATE', 'DELETE'];
+      // In a real app, you'd use a proper SQL formatting library like sql-formatter.
+      // This is a simplified version to demonstrate the concept.
+      const keywords = ['SELECT', 'FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT', 'JOIN', 'ON', 'INSERT', 'UPDATE', 'DELETE', 'AND', 'OR'];
       let formatted = value.replace(/\s+/g, ' ').trim();
-      
+
       keywords.forEach(keyword => {
         const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-        formatted = formatted.replace(regex, keyword.toUpperCase());
+        formatted = formatted.replace(regex, ` ${keyword.toUpperCase()} `);
       });
-
+      
       // Add newlines for better readability
       formatted = formatted.replace(/ FROM /g, '\nFROM ')
-                           .replace(/ WHERE /g, '\nWHERE ')
+                           .replace(/ JOIN /g, '\nJOIN ')
+                           .replace(/ ON /g, '\n  ON ')
                            .replace(/ GROUP BY /g, '\nGROUP BY ')
                            .replace(/ ORDER BY /g, '\nORDER BY ');
 
-      setValue(formatted);
+      // Handle WHERE clause with multiple AND/OR
+      const whereIndex = formatted.toUpperCase().indexOf('WHERE ');
+      if (whereIndex > -1) {
+        const whereClause = formatted.substring(whereIndex + 6);
+        const conditions = whereClause.split(/\s+(AND|OR)\s+/i);
+        
+        // This is a simplification. A real implementation would need a proper parser.
+        if (conditions.length > 2) {
+          let newWhereClause = 'WHERE ';
+          let andOrStack = [''];
+          
+          let i = 0;
+          while(i < conditions.length) {
+            let condition = conditions[i].trim();
+            const nextOperator = (conditions[i+1] || '').toUpperCase();
+
+            // Handle parentheses
+            let openParen = 0;
+            if (condition.startsWith('(')) {
+                let temp = condition;
+                while(temp.startsWith('(')) {
+                    openParen++;
+                    temp = temp.substring(1).trim();
+                }
+            }
+             
+            let closeParen = 0;
+            if (condition.endsWith(')')) {
+                let temp = condition;
+                while(temp.endsWith(')')) {
+                    closeParen++;
+                    temp = temp.substring(0, temp.length - 1).trim();
+                }
+            }
+            
+            if (i === 0) {
+              newWhereClause += condition;
+            } else {
+              const indent = '    '.repeat(openParen + 1);
+              newWhereClause += `\n${indent}${andOrStack.pop()} ${condition}`;
+            }
+
+            if (nextOperator === 'AND' || nextOperator === 'OR') {
+              andOrStack.push(nextOperator);
+              i += 2;
+            } else {
+              i += 1;
+            }
+          }
+          
+          const baseQuery = formatted.substring(0, whereIndex);
+          formatted = `${baseQuery}\n${newWhereClause}`;
+        } else {
+          formatted = formatted.replace(/ WHERE /g, '\nWHERE ');
+        }
+      }
+
+      // Cleanup extra spaces
+      formatted = formatted.replace(/\s+/g, ' ').replace(/\s+\n/g, '\n').replace(/\n\s+/g, '\n').trim();
+      formatted = formatted.replace(/ \n/g, '\n');
+      
+      const lines = formatted.split('\n');
+      const indentedLines = lines.map((line, index) => {
+        line = line.trim();
+        if (index > 0 && !line.startsWith('(') && (
+            line.toUpperCase().startsWith('FROM') ||
+            line.toUpperCase().startsWith('WHERE') ||
+            line.toUpperCase().startsWith('GROUP BY') ||
+            line.toUpperCase().startsWith('ORDER BY') ||
+            line.toUpperCase().startsWith('JOIN')
+        )) {
+            return line;
+        }
+        if (index > 0) {
+            return '  ' + line;
+        }
+        return line;
+      });
+
+      setValue(indentedLines.join('\n'));
     }
   }));
 
