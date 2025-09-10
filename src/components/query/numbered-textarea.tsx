@@ -80,7 +80,6 @@ const NumberedTextarea = React.forwardRef((props, ref) => {
   const getCursorCoordinates = (textarea: HTMLTextAreaElement) => {
     const { selectionStart } = textarea;
     const text = textarea.value.substring(0, selectionStart);
-    const lines = text.split('\n');
     
     const div = document.createElement('div');
     const style = window.getComputedStyle(textarea);
@@ -92,11 +91,10 @@ const NumberedTextarea = React.forwardRef((props, ref) => {
     div.style.whiteSpace = 'pre-wrap';
     div.style.width = style.width;
     
-    div.textContent = text.substring(0, selectionStart);
+    div.textContent = text;
     document.body.appendChild(div);
 
     const span = document.createElement('span');
-    span.textContent = text.substring(selectionStart);
     div.appendChild(span);
 
     const rect = textarea.getBoundingClientRect();
@@ -112,69 +110,58 @@ const NumberedTextarea = React.forwardRef((props, ref) => {
 
   const updateSuggestions = (text: string, cursorPosition: number) => {
       const textUntilCursor = text.substring(0, cursorPosition);
-      const lastWordMatch = textUntilCursor.match(/\b(\w+)$/);
-      const currentWord = lastWordMatch ? lastWordMatch[1] : '';
+      const currentWordMatch = textUntilCursor.match(/(\w+)$/);
+      const currentWord = currentWordMatch ? currentWordMatch[1].toLowerCase() : '';
       
-      const tokens = textUntilCursor.trim().split(/\s+/);
-      const lastToken = tokens[tokens.length - 1]?.toUpperCase();
-      const secondLastToken = tokens[tokens.length - 2]?.toUpperCase();
+      const tokens = textUntilCursor.toUpperCase().split(/[\s,()]+/);
+      let lastToken = '';
+      for (let i = tokens.length - 1; i >= 0; i--) {
+        if (tokens[i]) {
+            lastToken = tokens[i];
+            break;
+        }
+      }
 
       let newSuggestions: Suggestion[] = [];
 
-      // Suggest tables after FROM or JOIN
-      if (['FROM', 'JOIN'].includes(lastToken)) {
-          newSuggestions = schemaContent
-            .map(t => ({ name: t.name, type: 'table' as const}));
-      } 
-      // Suggest columns after a table name/alias or ON
-      else if (secondLastToken && ['FROM', 'JOIN'].includes(secondLastToken)) {
-         const tableAlias = lastToken.toLowerCase();
-         const table = schemaContent.find(t => t.name === tableAlias);
-         if (table) {
-             newSuggestions = table.columns.map(c => ({ name: c.name, type: 'column' as const }));
-         }
-      }
-      else {
-          // Suggest keywords
-          newSuggestions = SQL_KEYWORDS
-            .filter(kw => kw.toLowerCase().startsWith(currentWord.toLowerCase()))
-            .map(kw => ({ name: kw, type: 'keyword' as const }));
-          
-          // Suggest tables if current word matches
-          if (currentWord.length > 0) {
-              const tableSuggestions = schemaContent
-                  .filter(t => t.name.toLowerCase().startsWith(currentWord.toLowerCase()))
-                  .map(t => ({ name: t.name, type: 'table' as const }));
-              newSuggestions.push(...tableSuggestions);
+      if (lastToken === 'FROM' || lastToken === 'JOIN') {
+          newSuggestions = schemaContent.map(t => ({ name: t.name, type: 'table' as const}));
+      } else {
+          // Default to suggesting keywords and tables
+          const keywordSuggestions = SQL_KEYWORDS.map(kw => ({ name: kw, type: 'keyword' as const }));
+          const tableSuggestions = schemaContent.map(t => ({ name: t.name, type: 'table' as const }));
+          const allColumns = schemaContent.flatMap(t => t.columns.map(c => ({name: c.name, type: 'column' as const})));
+          const uniqueColumns = Array.from(new Map(allColumns.map(item => [item.name, item])).values());
 
-              // Suggest columns
-              const allColumns = schemaContent.flatMap(t => t.columns.map(c => c.name));
-              const uniqueColumns = [...new Set(allColumns)];
-              const columnSuggestions = uniqueColumns
-                  .filter(c => c.toLowerCase().startsWith(currentWord.toLowerCase()))
-                  .map(c => ({ name: c, type: 'column' as const}));
-              newSuggestions.push(...columnSuggestions);
-          }
+          newSuggestions = [...keywordSuggestions, ...tableSuggestions, ...uniqueColumns];
       }
 
-      const uniqueSuggestions = Array.from(new Map(newSuggestions.map(item => [item.name, item])).values());
+      let filteredSuggestions = newSuggestions;
+      if (currentWord) {
+        filteredSuggestions = newSuggestions.filter(s => s.name.toLowerCase().startsWith(currentWord) && s.name.toLowerCase() !== currentWord);
+      }
       
+      const uniqueSuggestions = Array.from(new Map(filteredSuggestions.map(item => [item.name, item])).values());
+      
+      setSuggestions(uniqueSuggestions.slice(0, 10)); // Limit suggestions
+
       if (textareaRef.current && uniqueSuggestions.length > 0 && currentWord.length > 0) {
         const { top, left } = getCursorCoordinates(textareaRef.current);
         setSuggestionPosition({ top, left });
+      } else {
+        setSuggestions([]);
       }
-
-      setSuggestions(uniqueSuggestions.filter(s => s.name.toLowerCase() !== currentWord.toLowerCase()));
   };
   
   const handleSuggestionSelect = (suggestion: Suggestion) => {
     const text = value;
     const cursor = textareaRef.current?.selectionStart || 0;
+    
     const textUntilCursor = text.substring(0, cursor);
-    const lastWordMatch = textUntilCursor.match(/\b(\w+)$/);
-
-    let newText = '';
-    let newCursorPos = 0;
+    const lastWordMatch = textUntilCursor.match(/(\w+)$/);
+    
+    let newText;
+    let newCursorPos;
 
     if (lastWordMatch) {
       const startIndex = lastWordMatch.index || 0;
@@ -213,6 +200,7 @@ const NumberedTextarea = React.forwardRef((props, ref) => {
         onScroll={handleTextareaScroll}
         onKeyDown={handleKeyDown}
         onClick={(e) => updateSuggestions(value, e.currentTarget.selectionStart)}
+        onKeyUp={(e) => updateSuggestions(value, e.currentTarget.selectionStart)}
         className={cn(
           'flex-1 resize-none bg-transparent p-4 font-code text-sm leading-normal ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
           'border-none focus:ring-0'
