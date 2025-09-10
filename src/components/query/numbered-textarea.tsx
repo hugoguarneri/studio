@@ -17,103 +17,41 @@ const NumberedTextarea = forwardRef((props, ref) => {
 
   useImperativeHandle(ref, () => ({
     formatQuery: () => {
-      // In a real app, you'd use a proper SQL formatting library like sql-formatter.
-      // This is a simplified version to demonstrate the concept.
-      const keywords = ['SELECT', 'FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT', 'JOIN', 'ON', 'INSERT', 'UPDATE', 'DELETE', 'AND', 'OR'];
+      // A more robust regex-based formatting approach.
       let formatted = value.replace(/\s+/g, ' ').trim();
 
+      // Uppercase major keywords
+      const keywords = ['SELECT', 'FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT', 'JOIN', 'ON', 'INSERT', 'UPDATE', 'DELETE', 'AND', 'OR'];
       keywords.forEach(keyword => {
         const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-        formatted = formatted.replace(regex, ` ${keyword.toUpperCase()} `);
+        formatted = formatted.replace(regex, keyword.toUpperCase());
       });
-      
-      // Add newlines for better readability
-      formatted = formatted.replace(/ FROM /g, '\nFROM ')
-                           .replace(/ JOIN /g, '\nJOIN ')
-                           .replace(/ ON /g, '\n  ON ')
-                           .replace(/ GROUP BY /g, '\nGROUP BY ')
-                           .replace(/ ORDER BY /g, '\nORDER BY ');
 
-      // Handle WHERE clause with multiple AND/OR
-      const whereIndex = formatted.toUpperCase().indexOf('WHERE ');
-      if (whereIndex > -1) {
-        const whereClause = formatted.substring(whereIndex + 6);
-        const conditions = whereClause.split(/\s+(AND|OR)\s+/i);
+      // Add newlines before major clauses
+      formatted = formatted
+        .replace(/\s*FROM\s*/g, '\nFROM ')
+        .replace(/\s*JOIN\s*/g, '\nJOIN ')
+        .replace(/\s*WHERE\s*/g, '\nWHERE ')
+        .replace(/\s*GROUP BY\s*/g, '\nGROUP BY ')
+        .replace(/\s*ORDER BY\s*/g, '\nORDER BY ')
+        .replace(/\s*LIMIT\s*/g, '\nLIMIT ');
         
-        // This is a simplification. A real implementation would need a proper parser.
-        if (conditions.length > 2) {
-          let newWhereClause = 'WHERE ';
-          let andOrStack = [''];
-          
-          let i = 0;
-          while(i < conditions.length) {
-            let condition = conditions[i].trim();
-            const nextOperator = (conditions[i+1] || '').toUpperCase();
-
-            // Handle parentheses
-            let openParen = 0;
-            if (condition.startsWith('(')) {
-                let temp = condition;
-                while(temp.startsWith('(')) {
-                    openParen++;
-                    temp = temp.substring(1).trim();
-                }
-            }
-             
-            let closeParen = 0;
-            if (condition.endsWith(')')) {
-                let temp = condition;
-                while(temp.endsWith(')')) {
-                    closeParen++;
-                    temp = temp.substring(0, temp.length - 1).trim();
-                }
-            }
-            
-            if (i === 0) {
-              newWhereClause += condition;
-            } else {
-              const indent = '    '.repeat(openParen + 1);
-              newWhereClause += `\n${indent}${andOrStack.pop()} ${condition}`;
-            }
-
-            if (nextOperator === 'AND' || nextOperator === 'OR') {
-              andOrStack.push(nextOperator);
-              i += 2;
-            } else {
-              i += 1;
-            }
-          }
-          
-          const baseQuery = formatted.substring(0, whereIndex);
-          formatted = `${baseQuery}\n${newWhereClause}`;
-        } else {
-          formatted = formatted.replace(/ WHERE /g, '\nWHERE ');
-        }
-      }
-
-      // Cleanup extra spaces
-      formatted = formatted.replace(/\s+/g, ' ').replace(/\s+\n/g, '\n').replace(/\n\s+/g, '\n').trim();
-      formatted = formatted.replace(/ \n/g, '\n');
+      // Handle WHERE clause conditions
+      formatted = formatted
+        .replace(/\s*AND\s*/g, '\n  AND ')
+        .replace(/\s*OR\s*/g, '\n  OR ');
       
-      const lines = formatted.split('\n');
-      const indentedLines = lines.map((line, index) => {
-        line = line.trim();
-        if (index > 0 && !line.startsWith('(') && (
-            line.toUpperCase().startsWith('FROM') ||
-            line.toUpperCase().startsWith('WHERE') ||
-            line.toUpperCase().startsWith('GROUP BY') ||
-            line.toUpperCase().startsWith('ORDER BY') ||
-            line.toUpperCase().startsWith('JOIN')
-        )) {
-            return line;
-        }
-        if (index > 0) {
-            return '  ' + line;
-        }
-        return line;
-      });
+      // Handle JOIN ON conditions
+      formatted = formatted
+        .replace(/\s*ON\s*/g, '\n  ON ');
 
-      setValue(indentedLines.join('\n'));
+      // Indent subqueries in parentheses on new lines
+      formatted = formatted.replace(/\(\s*SELECT/g, '(\n  SELECT');
+
+      // Cleanup multiple newlines
+      formatted = formatted.replace(/\n\s*\n/g, '\n');
+
+      setValue(formatted.trim());
     }
   }));
 
