@@ -1,14 +1,25 @@
 
 'use client'
-import { Card, CardContent, CardFooter, CardHeader, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardDescription, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { PlayCircle, Save, Sparkles } from "lucide-react"
+import { PlayCircle, Save, Sparkles, Code } from "lucide-react"
 import NumberedTextarea from "./numbered-textarea"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet"
 import AIAssistant from "./ai-assistant"
 import { Input } from "../ui/input"
+import { useRef } from "react"
+
+interface NumberedTextareaHandle {
+  formatQuery: () => void;
+}
 
 export default function QueryEditor() {
+    const numberedTextareaRef = useRef<NumberedTextareaHandle>(null);
+
+    const handleFormatQuery = () => {
+        numberedTextareaRef.current?.formatQuery();
+    }
+
     return (
         <Card className="flex flex-col h-full">
             <CardHeader className="p-4">
@@ -21,13 +32,17 @@ export default function QueryEditor() {
                 </CardDescription>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col p-4 pt-0">
-                <NumberedTextarea />
+                <NumberedTextarea ref={numberedTextareaRef} />
             </CardContent>
             <CardFooter className="flex items-center justify-between gap-2 p-4 border-t">
                 <div>
                     <span className="text-xs text-muted-foreground">Limit 100</span>
                 </div>
                 <div className="flex items-center gap-2">
+                    <Button variant="ghost" onClick={handleFormatQuery}>
+                        <Code className="mr-2 size-4" />
+                        Format
+                    </Button>
                     <Sheet>
                         <SheetTrigger asChild>
                             <Button variant="ghost">

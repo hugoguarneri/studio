@@ -1,10 +1,10 @@
 
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 
-export default function NumberedTextarea() {
+const NumberedTextarea = forwardRef((props, ref) => {
   const [value, setValue] = useState('SELECT * FROM users;');
   const [lineCount, setLineCount] = useState(1);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
@@ -14,6 +14,28 @@ export default function NumberedTextarea() {
     const lines = value.split('\n').length;
     setLineCount(lines);
   }, [value]);
+
+  useImperativeHandle(ref, () => ({
+    formatQuery: () => {
+      // Basic formatter: uppercase keywords and fix spacing.
+      // In a real app, you'd use a proper SQL formatting library.
+      const keywords = ['SELECT', 'FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT', 'JOIN', 'ON', 'INSERT', 'UPDATE', 'DELETE'];
+      let formatted = value.replace(/\s+/g, ' ').trim();
+      
+      keywords.forEach(keyword => {
+        const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+        formatted = formatted.replace(regex, keyword.toUpperCase());
+      });
+
+      // Add newlines for better readability
+      formatted = formatted.replace(/ FROM /g, '\nFROM ')
+                           .replace(/ WHERE /g, '\nWHERE ')
+                           .replace(/ GROUP BY /g, '\nGROUP BY ')
+                           .replace(/ ORDER BY /g, '\nORDER BY ');
+
+      setValue(formatted);
+    }
+  }));
 
   const handleTextareaScroll = () => {
     if (lineNumbersRef.current && textareaRef.current) {
@@ -51,4 +73,8 @@ export default function NumberedTextarea() {
       />
     </div>
   );
-}
+});
+
+NumberedTextarea.displayName = "NumberedTextarea";
+
+export default NumberedTextarea;
