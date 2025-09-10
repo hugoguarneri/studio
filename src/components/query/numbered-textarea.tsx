@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef, useEffect, useImperativeHandle } from 'react';
+import React, { useState, useRef, useEffect, useImperativeHandle } from 'react';
 import { cn } from '@/lib/utils';
 import QuerySuggestions, { type Suggestion } from './query-suggestions';
 import { schemaContent } from './database-schema-mock';
