@@ -23,7 +23,8 @@ const NumberedTextarea = forwardRef((props, ref) => {
       keywords.forEach(keyword => {
         const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
         if (keyword === 'AND' || keyword === 'OR') {
-          formatted = formatted.replace(regex, `  ${keyword.toUpperCase()}`);
+          // Add extra indentation for AND/OR within WHERE
+          formatted = formatted.replace(regex, `\n  ${keyword.toUpperCase()}`);
         } else {
           formatted = formatted.replace(regex, `\n${keyword.toUpperCase()}`);
         }
@@ -33,7 +34,7 @@ const NumberedTextarea = forwardRef((props, ref) => {
       let indentLevel = 0;
       const lines = formatted.split('\n');
 
-      lines.forEach((line, index) => {
+      lines.forEach((line) => {
         if (!line.trim()) return;
 
         let trimmedLine = line.trim();
@@ -41,7 +42,7 @@ const NumberedTextarea = forwardRef((props, ref) => {
         if (trimmedLine.startsWith(')')) {
             indentLevel = Math.max(0, indentLevel - 1);
         }
-
+        
         finalResult += '  '.repeat(indentLevel) + trimmedLine + '\n';
 
         if (trimmedLine.endsWith('(')) {
@@ -53,7 +54,34 @@ const NumberedTextarea = forwardRef((props, ref) => {
       // Cleanup multiple newlines and trailing/leading spaces
       finalResult = finalResult.replace(/\n\s*\n/g, '\n').trim();
       
-      setValue(finalResult);
+      // Handle parentheses specifically for block-like structure
+      let resultWithParens = '';
+      indentLevel = 0;
+      finalResult.split('\n').forEach(line => {
+          let trimmedLine = line.trim();
+          if (trimmedLine.endsWith(')')) {
+              indentLevel = Math.max(0, indentLevel - 1);
+              resultWithParens += '  '.repeat(indentLevel) + trimmedLine + '\n';
+          } else if (trimmedLine.endsWith('(')) {
+              resultWithParens += '  '.repeat(indentLevel) + trimmedLine + '\n';
+              indentLevel++;
+          } else {
+              resultWithParens += '  '.repeat(indentLevel) + trimmedLine + '\n';
+          }
+      });
+      
+      // A final pass to fix common issues
+      resultWithParens = resultWithParens
+        .replace(/\(\s*\n/g, '(\n')
+        .replace(/\n\s*\)/g, '\n)')
+        .replace(/\s+AND/g, '\n  AND')
+        .replace(/\s+OR/g, '\n  OR')
+        .replace(/JOIN/g, '\nJOIN')
+        .replace(/WHERE/g, '\nWHERE')
+        .replace(/FROM/g, '\nFROM')
+        .trim();
+
+      setValue(resultWithParens);
     }
   }));
 
