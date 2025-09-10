@@ -29,7 +29,7 @@ export default function NumberedTextarea() {
     <div className="flex flex-1 border bg-background overflow-hidden relative rounded-md">
       <div 
         ref={lineNumbersRef} 
-        className="w-12 text-right p-4 text-muted-foreground select-none overflow-y-hidden bg-muted/30 font-code text-sm"
+        className="w-12 text-right p-4 text-muted-foreground select-none overflow-y-hidden bg-muted/30 font-code text-sm leading-normal"
         aria-hidden="true"
       >
         {Array.from({ length: lineCount }, (_, i) => (
