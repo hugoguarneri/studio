@@ -36,19 +36,13 @@ const NumberedTextarea = forwardRef((props, ref) => {
         .replace(/\s*ORDER BY\s*/g, '\nORDER BY ')
         .replace(/\s*LIMIT\s*/g, '\nLIMIT ');
         
-      // Handle WHERE clause conditions
+      // Handle WHERE clause conditions and parentheses
       formatted = formatted
-        .replace(/\s*AND\s*/g, '\n  AND ')
-        .replace(/\s*OR\s*/g, '\n  OR ');
-      
-      // Handle JOIN ON conditions
-      formatted = formatted
-        .replace(/\s*ON\s*/g, '\n  ON ');
-
-      // Indent subqueries in parentheses on new lines
-      formatted = formatted
-        .replace(/\(\s*/g, '(\n  ')
-        .replace(/\s*\)/g, '\n)');
+        .replace(/\s*\bAND\b\s*/g, '\n  AND ')
+        .replace(/\s*\bOR\b\s*/g, '\n  OR ')
+        .replace(/\s*ON\s*/g, '\n  ON ')
+        .replace(/\s*\(\s*/g, '(\n    ')
+        .replace(/\s*\)\s*/g, '\n  )');
 
       // Cleanup multiple newlines
       formatted = formatted.replace(/\n\s*\n/g, '\n');
