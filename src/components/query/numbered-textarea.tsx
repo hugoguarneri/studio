@@ -46,7 +46,9 @@ const NumberedTextarea = forwardRef((props, ref) => {
         .replace(/\s*ON\s*/g, '\n  ON ');
 
       // Indent subqueries in parentheses on new lines
-      formatted = formatted.replace(/\(\s*SELECT/g, '(\n  SELECT');
+      formatted = formatted
+        .replace(/\(\s*/g, '(\n  ')
+        .replace(/\s*\)/g, '\n)');
 
       // Cleanup multiple newlines
       formatted = formatted.replace(/\n\s*\n/g, '\n');
