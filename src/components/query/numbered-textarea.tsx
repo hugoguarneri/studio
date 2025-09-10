@@ -1,13 +1,13 @@
 
 'use client';
 
-import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
+import { useState, useRef, useEffect, useImperativeHandle } from 'react';
 import { cn } from '@/lib/utils';
 import QuerySuggestions, { type Suggestion } from './query-suggestions';
 import { schemaContent } from './database-schema-mock';
 import { format } from 'sql-formatter';
 
-const NumberedTextarea = forwardRef((props, ref) => {
+const NumberedTextarea = React.forwardRef((props, ref) => {
   const [value, setValue] = useState('SELECT * FROM users u JOIN orders o on u.id = o.user_id where u.id = 1 and (u.name = \'test\' or u.email = \'test@test.com\') and u.id > 100;');
   const [lineCount, setLineCount] = useState(1);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
