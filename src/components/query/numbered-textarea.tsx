@@ -7,6 +7,13 @@ import QuerySuggestions, { type Suggestion } from './query-suggestions';
 import { schemaContent } from './database-schema-mock';
 import { format } from 'sql-formatter';
 
+const SQL_KEYWORDS = [
+    'SELECT', 'FROM', 'WHERE', 'JOIN', 'ON', 'GROUP BY', 'ORDER BY', 
+    'LIMIT', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'TABLE', 'VIEW',
+    'INDEX', 'ALTER', 'DROP', 'AND', 'OR', 'NOT', 'IN', 'LIKE', 'BETWEEN',
+    'AS', 'DISTINCT', 'COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'HAVING'
+];
+
 const NumberedTextarea = React.forwardRef((props, ref) => {
   const [value, setValue] = useState('SELECT * FROM users u JOIN orders o on u.id = o.user_id where u.id = 1 and (u.name = \'test\' or u.email = \'test@test.com\') and u.id > 100;');
   const [lineCount, setLineCount] = useState(1);
@@ -32,7 +39,6 @@ const NumberedTextarea = React.forwardRef((props, ref) => {
         setValue(formattedQuery);
       } catch (error) {
         console.error("Failed to format SQL:", error);
-        // Optionally, show a toast or message to the user
       }
     }
   }));
@@ -62,7 +68,6 @@ const NumberedTextarea = React.forwardRef((props, ref) => {
         
         setValue(newValue);
 
-        // We need to wait for the state to update before setting the cursor position
         setTimeout(() => {
             textarea.selectionStart = textarea.selectionEnd = selectionStart + 2;
         }, 0);
@@ -76,18 +81,15 @@ const NumberedTextarea = React.forwardRef((props, ref) => {
     const { selectionStart } = textarea;
     const text = textarea.value.substring(0, selectionStart);
     const lines = text.split('\n');
-    const line = lines.length;
-    const column = lines[lines.length - 1].length;
-
+    
     const div = document.createElement('div');
     const style = window.getComputedStyle(textarea);
-    ['fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'letterSpacing', 'lineHeight', 'textTransform', 'wordSpacing'].forEach(prop => {
+    ['fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'letterSpacing', 'lineHeight', 'textTransform', 'wordSpacing', 'padding'].forEach(prop => {
         div.style.setProperty(prop, style.getPropertyValue(prop));
     });
     div.style.position = 'absolute';
     div.style.visibility = 'hidden';
     div.style.whiteSpace = 'pre-wrap';
-    div.style.padding = style.padding;
     div.style.width = style.width;
     
     div.textContent = text.substring(0, selectionStart);
@@ -103,36 +105,66 @@ const NumberedTextarea = React.forwardRef((props, ref) => {
     document.body.removeChild(div);
     
     return {
-        top: spanRect.top - rect.top + 20, // Add some offset
+        top: spanRect.top - rect.top + parseFloat(style.fontSize) + 4,
         left: spanRect.left - rect.left,
     };
   };
 
   const updateSuggestions = (text: string, cursorPosition: number) => {
       const textUntilCursor = text.substring(0, cursorPosition);
-      const lastWordMatch = textUntilCursor.match(/\b\w+$/);
-      const lastWord = lastWordMatch ? lastWordMatch[0] : '';
+      const lastWordMatch = textUntilCursor.match(/\b(\w+)$/);
+      const currentWord = lastWordMatch ? lastWordMatch[1] : '';
       
-      const lastKeywordMatch = textUntilCursor.trim().split(/\s+/).pop()?.toUpperCase();
+      const tokens = textUntilCursor.trim().split(/\s+/);
+      const lastToken = tokens[tokens.length - 1]?.toUpperCase();
+      const secondLastToken = tokens[tokens.length - 2]?.toUpperCase();
 
       let newSuggestions: Suggestion[] = [];
-      const fromOrJoinRegex = /\b(FROM|JOIN)\s+(\w+)?$/i;
 
-      if (fromOrJoinRegex.test(textUntilCursor.trim())) {
-        newSuggestions = schemaContent
-          .map(t => ({ name: t.name, type: 'table' as const}))
-          .filter(t => t.name.startsWith(lastWord));
-      } else {
-        setSuggestions([]);
-        return;
+      // Suggest tables after FROM or JOIN
+      if (['FROM', 'JOIN'].includes(lastToken)) {
+          newSuggestions = schemaContent
+            .map(t => ({ name: t.name, type: 'table' as const}));
+      } 
+      // Suggest columns after a table name/alias or ON
+      else if (secondLastToken && ['FROM', 'JOIN'].includes(secondLastToken)) {
+         const tableAlias = lastToken.toLowerCase();
+         const table = schemaContent.find(t => t.name === tableAlias);
+         if (table) {
+             newSuggestions = table.columns.map(c => ({ name: c.name, type: 'column' as const }));
+         }
       }
+      else {
+          // Suggest keywords
+          newSuggestions = SQL_KEYWORDS
+            .filter(kw => kw.toLowerCase().startsWith(currentWord.toLowerCase()))
+            .map(kw => ({ name: kw, type: 'keyword' as const }));
+          
+          // Suggest tables if current word matches
+          if (currentWord.length > 0) {
+              const tableSuggestions = schemaContent
+                  .filter(t => t.name.toLowerCase().startsWith(currentWord.toLowerCase()))
+                  .map(t => ({ name: t.name, type: 'table' as const }));
+              newSuggestions.push(...tableSuggestions);
+
+              // Suggest columns
+              const allColumns = schemaContent.flatMap(t => t.columns.map(c => c.name));
+              const uniqueColumns = [...new Set(allColumns)];
+              const columnSuggestions = uniqueColumns
+                  .filter(c => c.toLowerCase().startsWith(currentWord.toLowerCase()))
+                  .map(c => ({ name: c, type: 'column' as const}));
+              newSuggestions.push(...columnSuggestions);
+          }
+      }
+
+      const uniqueSuggestions = Array.from(new Map(newSuggestions.map(item => [item.name, item])).values());
       
-      if (textareaRef.current && newSuggestions.length > 0) {
+      if (textareaRef.current && uniqueSuggestions.length > 0 && currentWord.length > 0) {
         const { top, left } = getCursorCoordinates(textareaRef.current);
         setSuggestionPosition({ top, left });
       }
 
-      setSuggestions(newSuggestions);
+      setSuggestions(uniqueSuggestions.filter(s => s.name.toLowerCase() !== currentWord.toLowerCase()));
   };
   
   const handleSuggestionSelect = (suggestion: Suggestion) => {
@@ -142,12 +174,15 @@ const NumberedTextarea = React.forwardRef((props, ref) => {
     const lastWordMatch = textUntilCursor.match(/\b(\w+)$/);
 
     let newText = '';
+    let newCursorPos = 0;
+
     if (lastWordMatch) {
-      const lastWord = lastWordMatch[1];
       const startIndex = lastWordMatch.index || 0;
       newText = text.substring(0, startIndex) + suggestion.name + ' ' + text.substring(cursor);
+      newCursorPos = startIndex + suggestion.name.length + 1;
     } else {
       newText = text.substring(0, cursor) + suggestion.name + ' ' + text.substring(cursor);
+      newCursorPos = cursor + suggestion.name.length + 1;
     }
 
     setValue(newText);
@@ -155,7 +190,6 @@ const NumberedTextarea = React.forwardRef((props, ref) => {
     
     setTimeout(() => {
         textareaRef.current?.focus();
-        const newCursorPos = (lastWordMatch?.index || cursor) + suggestion.name.length + 1;
         textareaRef.current?.setSelectionRange(newCursorPos, newCursorPos);
     }, 0);
   };
