@@ -19,56 +19,33 @@ const NumberedTextarea = forwardRef((props, ref) => {
     formatQuery: () => {
       let formatted = value.replace(/\s+/g, ' ').trim();
       
-      const keywords = ['SELECT', 'FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT', 'JOIN', 'ON', 'INSERT', 'UPDATE', 'DELETE'];
+      const keywords = ['SELECT', 'FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT', 'JOIN', 'ON', 'INSERT', 'UPDATE', 'DELETE', 'AND', 'OR'];
       keywords.forEach(keyword => {
         const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-        formatted = formatted.replace(regex, `\n${keyword.toUpperCase()}`);
-      });
-      
-      let indentLevel = 0;
-      let result = '';
-      const lines = formatted.split('\n');
-
-      lines.forEach(line => {
-        if (!line.trim()) return;
-        
-        let trimmedLine = line.trim();
-        const indent = '  '.repeat(indentLevel);
-        
-        if (trimmedLine.includes(')')) {
-            indentLevel = Math.max(0, indentLevel - trimmedLine.match(/\)/g)!.length);
-        }
-
-        result += '  '.repeat(indentLevel) + trimmedLine + '\n';
-        
-        if (trimmedLine.includes('(')) {
-            indentLevel += trimmedLine.match(/\(/g)!.length;
+        if (keyword === 'AND' || keyword === 'OR') {
+          formatted = formatted.replace(regex, `  ${keyword.toUpperCase()}`);
+        } else {
+          formatted = formatted.replace(regex, `\n${keyword.toUpperCase()}`);
         }
       });
-
-      result = result
-        .replace(/\s+AND\s+/gi, '\n  AND ')
-        .replace(/\s+OR\s+/gi, '\n  OR ')
-        .replace(/\s+ON\s+/gi, '\n  ON ')
-        .replace(/\(\s*/g, '(\n')
-        .replace(/\s*\)/g, '\n)');
         
       let finalResult = '';
-      let currentIndent = 0;
-      const resultLines = result.split('\n');
+      let indentLevel = 0;
+      const lines = formatted.split('\n');
 
-      resultLines.forEach(line => {
+      lines.forEach((line, index) => {
         if (!line.trim()) return;
+
         let trimmedLine = line.trim();
-        
+
         if (trimmedLine.startsWith(')')) {
-          currentIndent = Math.max(0, currentIndent - 1);
+            indentLevel = Math.max(0, indentLevel - 1);
         }
 
-        finalResult += '  '.repeat(currentIndent) + trimmedLine + '\n';
+        finalResult += '  '.repeat(indentLevel) + trimmedLine + '\n';
 
         if (trimmedLine.endsWith('(')) {
-          currentIndent++;
+            indentLevel++;
         }
       });
 
@@ -90,6 +67,27 @@ const NumberedTextarea = forwardRef((props, ref) => {
     setValue(event.target.value);
   }
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      const { current: textarea } = textareaRef;
+      if (textarea) {
+        const { selectionStart, selectionEnd } = textarea;
+        const newValue = 
+          value.substring(0, selectionStart) + 
+          '  ' + 
+          value.substring(selectionEnd);
+        
+        setValue(newValue);
+
+        // We need to wait for the state to update before setting the cursor position
+        setTimeout(() => {
+            textarea.selectionStart = textarea.selectionEnd = selectionStart + 2;
+        }, 0);
+      }
+    }
+  }
+
   return (
     <div className="flex flex-1 border bg-background overflow-hidden relative rounded-md">
       <div 
@@ -106,6 +104,7 @@ const NumberedTextarea = forwardRef((props, ref) => {
         value={value}
         onChange={handleValueChange}
         onScroll={handleTextareaScroll}
+        onKeyDown={handleKeyDown}
         className={cn(
           'flex-1 resize-none bg-transparent p-4 font-code text-sm leading-normal ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
           'border-none focus:ring-0'
