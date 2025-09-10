@@ -81,19 +81,29 @@ const NumberedTextarea = React.forwardRef((props, ref) => {
     const { selectionStart } = textarea;
     const text = textarea.value.substring(0, selectionStart);
     
+    // Create a temporary div to measure the text dimensions
     const div = document.createElement('div');
     const style = window.getComputedStyle(textarea);
-    ['fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'letterSpacing', 'lineHeight', 'textTransform', 'wordSpacing', 'padding'].forEach(prop => {
-        div.style.setProperty(prop, style.getPropertyValue(prop));
+    
+    // Copy all relevant styles from the textarea to the div
+    [
+      'fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'letterSpacing', 
+      'lineHeight', 'textTransform', 'wordSpacing', 'paddingLeft', 'paddingTop',
+      'borderLeftWidth', 'borderTopWidth'
+    ].forEach(prop => {
+      div.style[prop as any] = style[prop as any];
     });
+    
     div.style.position = 'absolute';
     div.style.visibility = 'hidden';
-    div.style.whiteSpace = 'pre-wrap';
+    div.style.whiteSpace = 'pre-wrap'; // Use pre-wrap to respect newlines and spaces
     div.style.width = style.width;
     
     div.textContent = text;
+    
     document.body.appendChild(div);
 
+    // Create a span at the end of the text to get the coordinates
     const span = document.createElement('span');
     div.appendChild(span);
 
@@ -102,24 +112,25 @@ const NumberedTextarea = React.forwardRef((props, ref) => {
     
     document.body.removeChild(div);
     
-    return {
-        top: spanRect.top - rect.top + parseFloat(style.fontSize) + 4,
-        left: spanRect.left - rect.left,
-    };
+    // Calculate position relative to the textarea
+    const top = spanRect.top - rect.top + parseFloat(style.fontSize);
+    const left = spanRect.left - rect.left;
+
+    return { top, left };
   };
 
   const updateSuggestions = (text: string, cursorPosition: number) => {
       const textUntilCursor = text.substring(0, cursorPosition);
-      const currentWordMatch = textUntilCursor.match(/(\w+)$/);
+      const currentWordMatch = textUntilCursor.match(/(\b\w+)$/);
       const currentWord = currentWordMatch ? currentWordMatch[1].toLowerCase() : '';
       
       const tokens = textUntilCursor.toUpperCase().split(/[\s,()]+/);
       let lastToken = '';
-      for (let i = tokens.length - 1; i >= 0; i--) {
-        if (tokens[i]) {
-            lastToken = tokens[i];
-            break;
-        }
+      for (let i = tokens.length - 2; i >= 0; i--) {
+          if (tokens[i]) {
+              lastToken = tokens[i];
+              break;
+          }
       }
 
       let newSuggestions: Suggestion[] = [];
@@ -127,7 +138,6 @@ const NumberedTextarea = React.forwardRef((props, ref) => {
       if (lastToken === 'FROM' || lastToken === 'JOIN') {
           newSuggestions = schemaContent.map(t => ({ name: t.name, type: 'table' as const}));
       } else {
-          // Default to suggesting keywords and tables
           const keywordSuggestions = SQL_KEYWORDS.map(kw => ({ name: kw, type: 'keyword' as const }));
           const tableSuggestions = schemaContent.map(t => ({ name: t.name, type: 'table' as const }));
           const allColumns = schemaContent.flatMap(t => t.columns.map(c => ({name: c.name, type: 'column' as const})));
@@ -135,21 +145,20 @@ const NumberedTextarea = React.forwardRef((props, ref) => {
 
           newSuggestions = [...keywordSuggestions, ...tableSuggestions, ...uniqueColumns];
       }
-
+      
       let filteredSuggestions = newSuggestions;
       if (currentWord) {
         filteredSuggestions = newSuggestions.filter(s => s.name.toLowerCase().startsWith(currentWord) && s.name.toLowerCase() !== currentWord);
+      } else {
+        filteredSuggestions = [];
       }
       
       const uniqueSuggestions = Array.from(new Map(filteredSuggestions.map(item => [item.name, item])).values());
-      
-      setSuggestions(uniqueSuggestions.slice(0, 10)); // Limit suggestions
+      setSuggestions(uniqueSuggestions.slice(0, 10));
 
-      if (textareaRef.current && uniqueSuggestions.length > 0 && currentWord.length > 0) {
+      if (textareaRef.current && uniqueSuggestions.length > 0) {
         const { top, left } = getCursorCoordinates(textareaRef.current);
         setSuggestionPosition({ top, left });
-      } else {
-        setSuggestions([]);
       }
   };
   
@@ -158,7 +167,7 @@ const NumberedTextarea = React.forwardRef((props, ref) => {
     const cursor = textareaRef.current?.selectionStart || 0;
     
     const textUntilCursor = text.substring(0, cursor);
-    const lastWordMatch = textUntilCursor.match(/(\w+)$/);
+    const lastWordMatch = textUntilCursor.match(/(\b\w+)$/);
     
     let newText;
     let newCursorPos;
@@ -200,7 +209,11 @@ const NumberedTextarea = React.forwardRef((props, ref) => {
         onScroll={handleTextareaScroll}
         onKeyDown={handleKeyDown}
         onClick={(e) => updateSuggestions(value, e.currentTarget.selectionStart)}
-        onKeyUp={(e) => updateSuggestions(value, e.currentTarget.selectionStart)}
+        onKeyUp={(e) => {
+            if (e.key !== 'Escape' && e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Enter') {
+                updateSuggestions(value, e.currentTarget.selectionStart)
+            }
+        }}
         className={cn(
           'flex-1 resize-none bg-transparent p-4 font-code text-sm leading-normal ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
           'border-none focus:ring-0'
