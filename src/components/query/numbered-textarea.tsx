@@ -17,37 +17,66 @@ const NumberedTextarea = forwardRef((props, ref) => {
 
   useImperativeHandle(ref, () => ({
     formatQuery: () => {
-      // A more robust regex-based formatting approach.
       let formatted = value.replace(/\s+/g, ' ').trim();
-
-      // Uppercase major keywords
-      const keywords = ['SELECT', 'FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT', 'JOIN', 'ON', 'INSERT', 'UPDATE', 'DELETE', 'AND', 'OR'];
+      
+      const keywords = ['SELECT', 'FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT', 'JOIN', 'ON', 'INSERT', 'UPDATE', 'DELETE'];
       keywords.forEach(keyword => {
         const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-        formatted = formatted.replace(regex, keyword.toUpperCase());
+        formatted = formatted.replace(regex, `\n${keyword.toUpperCase()}`);
+      });
+      
+      let indentLevel = 0;
+      let result = '';
+      const lines = formatted.split('\n');
+
+      lines.forEach(line => {
+        if (!line.trim()) return;
+        
+        let trimmedLine = line.trim();
+        const indent = '  '.repeat(indentLevel);
+        
+        if (trimmedLine.includes(')')) {
+            indentLevel = Math.max(0, indentLevel - trimmedLine.match(/\)/g)!.length);
+        }
+
+        result += '  '.repeat(indentLevel) + trimmedLine + '\n';
+        
+        if (trimmedLine.includes('(')) {
+            indentLevel += trimmedLine.match(/\(/g)!.length;
+        }
       });
 
-      // Add newlines before major clauses
-      formatted = formatted
-        .replace(/\s*FROM\s*/g, '\nFROM ')
-        .replace(/\s*JOIN\s*/g, '\nJOIN ')
-        .replace(/\s*WHERE\s*/g, '\nWHERE ')
-        .replace(/\s*GROUP BY\s*/g, '\nGROUP BY ')
-        .replace(/\s*ORDER BY\s*/g, '\nORDER BY ')
-        .replace(/\s*LIMIT\s*/g, '\nLIMIT ');
+      result = result
+        .replace(/\s+AND\s+/gi, '\n  AND ')
+        .replace(/\s+OR\s+/gi, '\n  OR ')
+        .replace(/\s+ON\s+/gi, '\n  ON ')
+        .replace(/\(\s*/g, '(\n')
+        .replace(/\s*\)/g, '\n)');
         
-      // Handle WHERE clause conditions and parentheses
-      formatted = formatted
-        .replace(/\s*\bAND\b\s*/g, '\n  AND ')
-        .replace(/\s*\bOR\b\s*/g, '\n  OR ')
-        .replace(/\s*ON\s*/g, '\n  ON ')
-        .replace(/\s*\(\s*/g, '(\n    ')
-        .replace(/\s*\)\s*/g, '\n  )');
+      let finalResult = '';
+      let currentIndent = 0;
+      const resultLines = result.split('\n');
 
-      // Cleanup multiple newlines
-      formatted = formatted.replace(/\n\s*\n/g, '\n');
+      resultLines.forEach(line => {
+        if (!line.trim()) return;
+        let trimmedLine = line.trim();
+        
+        if (trimmedLine.startsWith(')')) {
+          currentIndent = Math.max(0, currentIndent - 1);
+        }
 
-      setValue(formatted.trim());
+        finalResult += '  '.repeat(currentIndent) + trimmedLine + '\n';
+
+        if (trimmedLine.endsWith('(')) {
+          currentIndent++;
+        }
+      });
+
+
+      // Cleanup multiple newlines and trailing/leading spaces
+      finalResult = finalResult.replace(/\n\s*\n/g, '\n').trim();
+      
+      setValue(finalResult);
     }
   }));
 
