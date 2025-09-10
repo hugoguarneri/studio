@@ -20,7 +20,7 @@ export default function QueryEditor() {
                     Enter your SQL query below. You can also use the AI assistant to generate one.
                 </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col p-0">
+            <CardContent className="flex-1 flex flex-col p-4 pt-0">
                 <NumberedTextarea />
             </CardContent>
             <CardFooter className="flex items-center justify-between gap-2 p-4 border-t">
