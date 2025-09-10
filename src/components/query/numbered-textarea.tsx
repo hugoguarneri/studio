@@ -1,14 +1,19 @@
 
 'use client';
 
-import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
+import { useState, useRef, useEffect, useImperativeHandle, forwardRef, useCallback } from 'react';
 import { cn } from '@/lib/utils';
+import QuerySuggestions, { type Suggestion } from './query-suggestions';
+import { schemaContent } from './database-schema-mock';
 
 const NumberedTextarea = forwardRef((props, ref) => {
   const [value, setValue] = useState('SELECT * FROM users u JOIN orders o on u.id = o.user_id where u.id = 1 and (u.name = \'test\' or u.email = \'test@test.com\') and u.id > 100;');
   const [lineCount, setLineCount] = useState(1);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [suggestionPosition, setSuggestionPosition] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
     const lines = value.split('\n').length;
@@ -17,80 +22,50 @@ const NumberedTextarea = forwardRef((props, ref) => {
 
   useImperativeHandle(ref, () => ({
     formatQuery: () => {
-      let formatted = value.replace(/\s+/g, ' ').trim();
+      let query = value;
+
+      // Add space around operators and parentheses
+      query = query.replace(/([=,()])/g, ' $1 ');
       
+      // Remove multi-spaces
+      query = query.replace(/\s+/g, ' ');
+
       const keywords = ['FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT', 'JOIN', 'ON', 'AND', 'OR', 'SELECT'];
       keywords.forEach(keyword => {
           const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-          formatted = formatted.replace(regex, `\n${keyword.toUpperCase()}`);
+          query = query.replace(regex, keyword.toUpperCase());
       });
-      
-      // Handle parentheses
-      formatted = formatted.replace(/\(/g, ' ( ');
-      formatted = formatted.replace(/\)/g, ' ) ');
-      formatted = formatted.replace(/\s+/g, ' '); // Clean up extra spaces again
 
-      let finalResult = '';
+      let formattedQuery = '';
       let indentLevel = 0;
-      const lines = formatted.split('\n');
+      const lines = query.split(/(\b(?:SELECT|FROM|WHERE|GROUP BY|ORDER BY|LIMIT|JOIN|ON|AND|OR)\b|\(|\))/gi);
 
-      lines.forEach((line) => {
-        if (!line.trim()) return;
+      lines.forEach(part => {
+          if (!part || part.trim() === '') return;
 
-        let trimmedLine = line.trim();
-
-        if (trimmedLine.startsWith(')')) {
-            indentLevel = Math.max(0, indentLevel - 1);
-        }
-        
-        finalResult += '  '.repeat(indentLevel) + trimmedLine + '\n';
-
-        if (trimmedLine.endsWith('(')) {
-            indentLevel++;
-        }
-      });
-      
-      finalResult = finalResult.replace(/\(\s*\n/g, '(\n');
-      finalResult = finalResult.replace(/\n\s*\)/g, '\n)');
-      
-      // Post-processing to fix common issues
-      let resultWithParens = '';
-      indentLevel = 0;
-      finalResult.split('\n').forEach(line => {
-          let trimmedLine = line.trim();
-          if (trimmedLine.startsWith(')')) {
+          const trimmedPart = part.trim();
+          
+          if (trimmedPart === ')') {
               indentLevel = Math.max(0, indentLevel - 1);
-          }
-          
-          let lineToAdd = '  '.repeat(indentLevel) + trimmedLine;
-          
-          // Don't add newline for the very first line if it's SELECT
-          if (resultWithParens === '' && trimmedLine.startsWith('SELECT')) {
-            resultWithParens += lineToAdd;
-          } else {
-            resultWithParens += '\n' + lineToAdd;
-          }
-
-          if (trimmedLine.endsWith('(')) {
+              formattedQuery += '\n' + '  '.repeat(indentLevel) + ')';
+          } else if (trimmedPart === '(') {
+              formattedQuery += '\n' + '  '.repeat(indentLevel) + '(';
               indentLevel++;
+          } else if (keywords.includes(trimmedPart)) {
+              if (trimmedPart === 'AND' || trimmedPart === 'OR' || trimmedPart === 'ON') {
+                  formattedQuery += '\n' + '  '.repeat(indentLevel) + trimmedPart;
+              } else if (trimmedPart === 'JOIN') {
+                  formattedQuery += '\n' + '  '.repeat(Math.max(0, indentLevel -1)) + trimmedPart;
+              }
+              else {
+                  formattedQuery += '\n' + trimmedPart;
+              }
+          } else {
+              formattedQuery += ' ' + trimmedPart;
           }
       });
       
-      // Final cleanup
-      resultWithParens = resultWithParens
-        .replace(/\n\s*\n/g, '\n') // Remove double newlines
-        .replace(/ \(/g, ' (\n')
-        .replace(/\) /g, '\n) ')
-        .replace(/\s+AND/g, '\n  AND')
-        .replace(/\s+OR/g, '\n  OR')
-        .replace(/\s*JOIN/g, '\nJOIN')
-        .replace(/\s*WHERE/g, '\nWHERE')
-        .replace(/\s*FROM/g, '\nFROM')
-        .replace(/\s*ON/g, '\n  ON')
-        .replace(/\s*SELECT/g, 'SELECT')
-        .trim();
-        
-      setValue(resultWithParens);
+      setValue(formattedQuery.trim());
     }
   }));
 
@@ -101,7 +76,9 @@ const NumberedTextarea = forwardRef((props, ref) => {
   };
   
   const handleValueChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setValue(event.target.value);
+    const text = event.target.value;
+    setValue(text);
+    updateSuggestions(text, event.target.selectionStart);
   }
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -122,8 +99,99 @@ const NumberedTextarea = forwardRef((props, ref) => {
             textarea.selectionStart = textarea.selectionEnd = selectionStart + 2;
         }, 0);
       }
+    } else if (event.key === 'Escape') {
+      setSuggestions([]);
     }
   }
+
+  const getCursorCoordinates = (textarea: HTMLTextAreaElement) => {
+    const { selectionStart } = textarea;
+    const text = textarea.value.substring(0, selectionStart);
+    const lines = text.split('\n');
+    const line = lines.length;
+    const column = lines[lines.length - 1].length;
+
+    const div = document.createElement('div');
+    const style = window.getComputedStyle(textarea);
+    ['fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'letterSpacing', 'lineHeight', 'textTransform', 'wordSpacing'].forEach(prop => {
+        div.style.setProperty(prop, style.getPropertyValue(prop));
+    });
+    div.style.position = 'absolute';
+    div.style.visibility = 'hidden';
+    div.style.whiteSpace = 'pre-wrap';
+    div.style.padding = style.padding;
+    div.style.width = style.width;
+    
+    div.textContent = text.substring(0, selectionStart);
+    document.body.appendChild(div);
+
+    const span = document.createElement('span');
+    span.textContent = text.substring(selectionStart);
+    div.appendChild(span);
+
+    const rect = textarea.getBoundingClientRect();
+    const spanRect = span.getBoundingClientRect();
+    
+    document.body.removeChild(div);
+    
+    return {
+        top: spanRect.top - rect.top + 20, // Add some offset
+        left: spanRect.left - rect.left,
+    };
+  };
+
+  const updateSuggestions = (text: string, cursorPosition: number) => {
+      const textUntilCursor = text.substring(0, cursorPosition);
+      const lastWordMatch = textUntilCursor.match(/\b\w+$/);
+      const lastWord = lastWordMatch ? lastWordMatch[0] : '';
+      
+      const lastKeywordMatch = textUntilCursor.trim().split(/\s+/).pop()?.toUpperCase();
+
+      let newSuggestions: Suggestion[] = [];
+      const fromOrJoinRegex = /\b(FROM|JOIN)\s+(\w+)?$/i;
+
+      if (fromOrJoinRegex.test(textUntilCursor.trim())) {
+        newSuggestions = schemaContent
+          .map(t => ({ name: t.name, type: 'table' as const}))
+          .filter(t => t.name.startsWith(lastWord));
+      } else {
+        setSuggestions([]);
+        return;
+      }
+      
+      if (textareaRef.current && newSuggestions.length > 0) {
+        const { top, left } = getCursorCoordinates(textareaRef.current);
+        setSuggestionPosition({ top, left });
+      }
+
+      setSuggestions(newSuggestions);
+  };
+  
+  const handleSuggestionSelect = (suggestion: Suggestion) => {
+    const text = value;
+    const cursor = textareaRef.current?.selectionStart || 0;
+    const textUntilCursor = text.substring(0, cursor);
+    const lastWordMatch = textUntilCursor.match(/\b(\w+)$/);
+
+    let newText = '';
+    if (lastWordMatch) {
+      const lastWord = lastWordMatch[1];
+      const startIndex = lastWordMatch.index || 0;
+      newText = text.substring(0, startIndex) + suggestion.name + ' ' + text.substring(cursor);
+    } else {
+      newText = text.substring(0, cursor) + suggestion.name + ' ' + text.substring(cursor);
+    }
+
+    setValue(newText);
+    setSuggestions([]);
+    
+    setTimeout(() => {
+        textareaRef.current?.focus();
+        const newCursorPos = (lastWordMatch?.index || cursor) + suggestion.name.length + 1;
+        textareaRef.current?.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+  };
+
 
   return (
     <div className="flex flex-1 border bg-background overflow-hidden relative rounded-md">
@@ -142,6 +210,7 @@ const NumberedTextarea = forwardRef((props, ref) => {
         onChange={handleValueChange}
         onScroll={handleTextareaScroll}
         onKeyDown={handleKeyDown}
+        onClick={(e) => updateSuggestions(value, e.currentTarget.selectionStart)}
         className={cn(
           'flex-1 resize-none bg-transparent p-4 font-code text-sm leading-normal ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
           'border-none focus:ring-0'
@@ -150,6 +219,13 @@ const NumberedTextarea = forwardRef((props, ref) => {
         wrap="off"
         spellCheck="false"
       />
+      {suggestions.length > 0 && (
+          <QuerySuggestions 
+            suggestions={suggestions}
+            onSelect={handleSuggestionSelect}
+            position={suggestionPosition}
+          />
+      )}
     </div>
   );
 });
