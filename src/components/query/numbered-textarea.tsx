@@ -1,10 +1,11 @@
 
 'use client';
 
-import { useState, useRef, useEffect, useImperativeHandle, forwardRef, useCallback } from 'react';
+import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 import QuerySuggestions, { type Suggestion } from './query-suggestions';
 import { schemaContent } from './database-schema-mock';
+import { format } from 'sql-formatter';
 
 const NumberedTextarea = forwardRef((props, ref) => {
   const [value, setValue] = useState('SELECT * FROM users u JOIN orders o on u.id = o.user_id where u.id = 1 and (u.name = \'test\' or u.email = \'test@test.com\') and u.id > 100;');
@@ -22,50 +23,17 @@ const NumberedTextarea = forwardRef((props, ref) => {
 
   useImperativeHandle(ref, () => ({
     formatQuery: () => {
-      let query = value;
-
-      // Add space around operators and parentheses
-      query = query.replace(/([=,()])/g, ' $1 ');
-      
-      // Remove multi-spaces
-      query = query.replace(/\s+/g, ' ');
-
-      const keywords = ['FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT', 'JOIN', 'ON', 'AND', 'OR', 'SELECT'];
-      keywords.forEach(keyword => {
-          const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-          query = query.replace(regex, keyword.toUpperCase());
-      });
-
-      let formattedQuery = '';
-      let indentLevel = 0;
-      const lines = query.split(/(\b(?:SELECT|FROM|WHERE|GROUP BY|ORDER BY|LIMIT|JOIN|ON|AND|OR)\b|\(|\))/gi);
-
-      lines.forEach(part => {
-          if (!part || part.trim() === '') return;
-
-          const trimmedPart = part.trim();
-          
-          if (trimmedPart === ')') {
-              indentLevel = Math.max(0, indentLevel - 1);
-              formattedQuery += '\n' + '  '.repeat(indentLevel) + ')';
-          } else if (trimmedPart === '(') {
-              formattedQuery += '\n' + '  '.repeat(indentLevel) + '(';
-              indentLevel++;
-          } else if (keywords.includes(trimmedPart)) {
-              if (trimmedPart === 'AND' || trimmedPart === 'OR' || trimmedPart === 'ON') {
-                  formattedQuery += '\n' + '  '.repeat(indentLevel) + trimmedPart;
-              } else if (trimmedPart === 'JOIN') {
-                  formattedQuery += '\n' + '  '.repeat(Math.max(0, indentLevel -1)) + trimmedPart;
-              }
-              else {
-                  formattedQuery += '\n' + trimmedPart;
-              }
-          } else {
-              formattedQuery += ' ' + trimmedPart;
-          }
-      });
-      
-      setValue(formattedQuery.trim());
+      try {
+        const formattedQuery = format(value, {
+            language: 'sql',
+            tabWidth: 2,
+            keywordCase: 'upper',
+        });
+        setValue(formattedQuery);
+      } catch (error) {
+        console.error("Failed to format SQL:", error);
+        // Optionally, show a toast or message to the user
+      }
     }
   }));
 
