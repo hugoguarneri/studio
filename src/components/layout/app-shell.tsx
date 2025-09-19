@@ -73,7 +73,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <path d="M2 17l10 5 10-5" />
               <path d="M2 12l10 5 10-5" />
             </svg>
-            <h1 className="text-xl font-headline font-semibold text-sidebar-foreground">
+            <h1 className="text-xl font-headline font-semibold text-foreground">
               DataVision
             </h1>
           </div>
@@ -81,7 +81,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <SidebarContent>
           <div className="flex flex-col gap-4">
             <div className="mt-4">
-              <h2 className="px-2 mb-2 text-xs font-semibold text-sidebar-foreground/50 tracking-wider">Dashboards</h2>
+              <h2 className="px-2 mb-2 text-xs font-semibold text-muted-foreground tracking-wider">Dashboards</h2>
               <SidebarMenu>
                 {dashboardNavItems.map((item) => (
                   <SidebarMenuItem key={item.href}>
@@ -100,7 +100,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               </SidebarMenu>
             </div>
             <div>
-              <h2 className="px-2 mb-2 text-xs font-semibold text-sidebar-foreground/50 tracking-wider">Data Base</h2>
+              <h2 className="px-2 mb-2 text-xs font-semibold text-muted-foreground tracking-wider">Data Base</h2>
               <SidebarMenu>
                 {databaseNavItems.map((item) => (
                   <SidebarMenuItem key={item.href}>
