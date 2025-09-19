@@ -91,10 +91,8 @@ export default function DashboardPage({ params }: { params: { dashboardId: strin
   }
   
   const backgroundStyle: React.CSSProperties = isEditing ? {
-    background: 'repeating-dotted-background',
+    backgroundImage: 'radial-gradient(hsl(var(--border)) 1px, transparent 1px)',
     backgroundSize: '20px 20px',
-    backgroundImage: 'radial-gradient(circle at center, hsl(var(--border)) 1px, transparent 1.5px)',
-    backgroundPosition: '0 0',
   } : {};
 
 
